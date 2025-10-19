@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/radio_content.dart';
+import '../models/category.dart';
+import '../models/carousel_item.dart';
 
 class SupabaseService {
   static final SupabaseClient client = Supabase.instance.client;
@@ -82,9 +84,52 @@ class SupabaseService {
     await client.from('radio_content').delete().eq('id', id);
   }
 
+  // CATEGORY - Obtener / Crear / Eliminar categorías
+  static Future<List<Category>> getCategories() async {
+    final response = await client.from('categories').select().order('name');
+    return (response as List).map((j) => Category.fromJson(j)).toList();
+  }
+
+  static Future<Category> createCategory(Category category) async {
+    final response = await client.from('categories').insert(category.toJson()).select().single();
+    return Category.fromJson(response);
+  }
+
+  static Future<void> deleteCategory(String id) async {
+    await client.from('categories').delete().eq('id', id);
+  }
+
+  // CAROUSEL - Obtener / Crear / Actualizar / Eliminar items
+  static Future<List<CarouselItem>> getActiveCarousel() async {
+    final response = await client
+        .from('carousel_items')
+        .select()
+        .eq('is_active', true)
+        .order('order_position', ascending: true);
+    return (response as List).map((j) => CarouselItem.fromJson(j)).toList();
+  }
+
+  static Future<List<CarouselItem>> getAllCarousel() async {
+    final response = await client.from('carousel_items').select().order('order_position', ascending: true);
+    return (response as List).map((j) => CarouselItem.fromJson(j)).toList();
+  }
+
+  static Future<CarouselItem> createCarousel(CarouselItem item) async {
+    final response = await client.from('carousel_items').insert(item.toJson()).select().single();
+    return CarouselItem.fromJson(response);
+  }
+
+  static Future<CarouselItem> updateCarousel(String id, CarouselItem item) async {
+    final response = await client.from('carousel_items').update(item.toJson()).eq('id', id).select().single();
+    return CarouselItem.fromJson(response);
+  }
+
+  static Future<void> deleteCarousel(String id) async {
+    await client.from('carousel_items').delete().eq('id', id);
+  }
+
   // STORAGE - Subir archivo
   static Future<String> uploadFile(String bucket, String path, List<int> bytes) async {
-    // uploadBinary expects Uint8List; convert in case callers pass List<int>
     final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
     await client.storage.from(bucket).uploadBinary(path, data);
     return client.storage.from(bucket).getPublicUrl(path);

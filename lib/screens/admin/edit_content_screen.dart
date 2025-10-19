@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/radio_content.dart';
 import '../../providers/content_provider.dart';
+import '../../providers/category_provider.dart';
 
 class EditContentScreen extends StatefulWidget {
   final RadioContent content;
@@ -19,6 +20,7 @@ class _EditContentScreenState extends State<EditContentScreen> {
   late TextEditingController _videoUrlController;
   late TextEditingController _audioUrlController;
   late TextEditingController _thumbnailUrlController;
+  late String? _selectedCategoryId;
   late bool _isActive;
   bool _isLoading = false;
 
@@ -30,7 +32,12 @@ class _EditContentScreenState extends State<EditContentScreen> {
     _videoUrlController = TextEditingController(text: widget.content.videoUrl ?? '');
     _audioUrlController = TextEditingController(text: widget.content.audioUrl ?? '');
     _thumbnailUrlController = TextEditingController(text: widget.content.thumbnailUrl ?? '');
+    _selectedCategoryId = widget.content.categoryId;
     _isActive = widget.content.isActive;
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().loadCategories();
+    });
   }
 
   Future<void> _updateContent() async {
@@ -52,21 +59,12 @@ class _EditContentScreenState extends State<EditContentScreen> {
       thumbnailUrl: _thumbnailUrlController.text.trim().isEmpty
           ? null
           : _thumbnailUrlController.text.trim(),
+      categoryId: _selectedCategoryId,
       isActive: _isActive,
     );
 
-    if (widget.content.id == null) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('ID de contenido inválido'), backgroundColor: Colors.red),
-        );
-      }
-      return;
-    }
-
     final success = await context.read<ContentProvider>().updateContent(
-          widget.content.id!,
+          widget.content.id,
           content,
         );
 
@@ -138,6 +136,41 @@ class _EditContentScreenState extends State<EditContentScreen> {
               maxLines: 4,
             ),
             const SizedBox(height: 16),
+            
+            // Selector de categoría
+            Consumer<CategoryProvider>(
+              builder: (context, categoryProvider, child) {
+                if (categoryProvider.categories.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                
+                return DropdownButtonFormField<String>(
+                  value: _selectedCategoryId,
+                  decoration: const InputDecoration(
+                    labelText: 'Categoría',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.category),
+                  ),
+                  items: [
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('Sin categoría'),
+                    ),
+                    ...categoryProvider.categories.map((category) {
+                      return DropdownMenuItem(
+                        value: category.id,
+                        child: Text(category.name),
+                      );
+                    }).toList(),
+                  ],
+                  onChanged: (value) {
+                    setState(() => _selectedCategoryId = value);
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            
             TextFormField(
               controller: _thumbnailUrlController,
               decoration: const InputDecoration(

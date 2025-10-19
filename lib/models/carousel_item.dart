@@ -1,38 +1,35 @@
-class RadioContent {
+class CarouselItem {
   final String id;
   final String title;
   final String? description;
-  final String? videoUrl;
-  final String? audioUrl;
-  final String? thumbnailUrl;
+  final String imageUrl;
+  final String? linkUrl;
   final bool isActive;
-  final String? categoryId;
+  final int orderPosition;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  RadioContent({
+  CarouselItem({
     required this.id,
     required this.title,
     this.description,
-    this.videoUrl,
-    this.audioUrl,
-    this.thumbnailUrl,
+    required this.imageUrl,
+    this.linkUrl,
     this.isActive = true,
-    this.categoryId,
+    this.orderPosition = 0,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory RadioContent.fromJson(Map<String, dynamic> json) {
-    return RadioContent(
+  factory CarouselItem.fromJson(Map<String, dynamic> json) {
+    return CarouselItem(
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      videoUrl: json['video_url'],
-      audioUrl: json['audio_url'],
-      thumbnailUrl: json['thumbnail_url'],
+      imageUrl: json['image_url'],
+      linkUrl: json['link_url'],
       isActive: json['is_active'] ?? true,
-      categoryId: json['category_id'],
+      orderPosition: json['order_position'] ?? 0,
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );
@@ -42,35 +39,32 @@ class RadioContent {
     return {
       'title': title,
       'description': description,
-      'video_url': videoUrl,
-      'audio_url': audioUrl,
-      'thumbnail_url': thumbnailUrl,
+      'image_url': imageUrl,
+      'link_url': linkUrl,
       'is_active': isActive,
-      'category_id': categoryId,
+      'order_position': orderPosition,
     };
   }
 
-  RadioContent copyWith({
+  CarouselItem copyWith({
     String? id,
     String? title,
     String? description,
-    String? videoUrl,
-    String? audioUrl,
-    String? thumbnailUrl,
+    String? imageUrl,
+    String? linkUrl,
     bool? isActive,
-    String? categoryId,
+    int? orderPosition,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return RadioContent(
+    return CarouselItem(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      videoUrl: videoUrl ?? this.videoUrl,
-      audioUrl: audioUrl ?? this.audioUrl,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      linkUrl: linkUrl ?? this.linkUrl,
       isActive: isActive ?? this.isActive,
-      categoryId: categoryId ?? this.categoryId,
+      orderPosition: orderPosition ?? this.orderPosition,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

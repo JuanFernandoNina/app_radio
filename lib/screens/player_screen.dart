@@ -21,7 +21,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _showVideo = false;
   StreamSubscription<PlayerState>? _audioStateSub;
   StreamSubscription<PlaybackEvent>? _audioEventSub;
-  bool _videoInitError = false;
+  // NOTE: variable removed — errors are shown to user via SnackBar
 
   @override
   void initState() {
@@ -40,7 +40,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
         setState(() {});
       } catch (e) {
         // Video initialization failed (network / format / CORS)
-        _videoInitError = true;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error al cargar video: ${e.toString()}')),

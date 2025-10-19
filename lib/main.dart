@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/content_provider.dart';
+import 'providers/category_provider.dart';      // ← AGREGA ESTE
+import 'providers/carousel_provider.dart';      // ← AGREGA ESTE
 import 'services/supabase_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/admin/admin_login_screen.dart';
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ContentProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),   // ← AGREGA ESTE
+        ChangeNotifierProvider(create: (_) => CarouselProvider()),   // ← AGREGA ESTE
       ],
       child: MaterialApp(
         title: 'Radio App',

@@ -1,62 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/radio_content.dart';
-import '../../providers/content_provider.dart';
-import '../../providers/category_provider.dart';
+import '../../models/carousel_item.dart';
+import '../../providers/carousel_provider.dart';
 
-class AddContentScreen extends StatefulWidget {
-  const AddContentScreen({super.key});
+class AddCarouselScreen extends StatefulWidget {
+  const AddCarouselScreen({super.key});
 
   @override
-  State<AddContentScreen> createState() => _AddContentScreenState();
+  State<AddCarouselScreen> createState() => _AddCarouselScreenState();
 }
 
-class _AddContentScreenState extends State<AddContentScreen> {
+class _AddCarouselScreenState extends State<AddCarouselScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _videoUrlController = TextEditingController();
-  final _audioUrlController = TextEditingController();
-  final _thumbnailUrlController = TextEditingController();
-  String? _selectedCategoryId;
+  final _imageUrlController = TextEditingController();
+  final _linkUrlController = TextEditingController();
+  final _orderController = TextEditingController(text: '0');
   bool _isActive = true;
   bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CategoryProvider>().loadCategories();
-    });
-  }
-
-  Future<void> _saveContent() async {
+  Future<void> _saveCarousel() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
-    final content = RadioContent(
+    final item = CarouselItem(
       id: '',
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isEmpty
           ? null
           : _descriptionController.text.trim(),
-      videoUrl: _videoUrlController.text.trim().isEmpty
+      imageUrl: _imageUrlController.text.trim(),
+      linkUrl: _linkUrlController.text.trim().isEmpty
           ? null
-          : _videoUrlController.text.trim(),
-      audioUrl: _audioUrlController.text.trim().isEmpty
-          ? null
-          : _audioUrlController.text.trim(),
-      thumbnailUrl: _thumbnailUrlController.text.trim().isEmpty
-          ? null
-          : _thumbnailUrlController.text.trim(),
-      categoryId: _selectedCategoryId,
+          : _linkUrlController.text.trim(),
       isActive: _isActive,
+      orderPosition: int.tryParse(_orderController.text) ?? 0,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
-    final success = await context.read<ContentProvider>().createContent(content);
+    final success = await context.read<CarouselProvider>().createCarousel(item);
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -64,7 +49,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Contenido creado exitosamente'),
+            content: Text('Banner creado exitosamente'),
             backgroundColor: Colors.green,
           ),
         );
@@ -72,7 +57,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${context.read<ContentProvider>().error}'),
+            content: Text('Error: ${context.read<CarouselProvider>().error}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -84,9 +69,9 @@ class _AddContentScreenState extends State<AddContentScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _videoUrlController.dispose();
-    _audioUrlController.dispose();
-    _thumbnailUrlController.dispose();
+    _imageUrlController.dispose();
+    _linkUrlController.dispose();
+    _orderController.dispose();
     super.dispose();
   }
 
@@ -94,7 +79,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agregar Contenido'),
+        title: const Text('Agregar Banner'),
       ),
       body: Form(
         key: _formKey,
@@ -123,53 +108,37 @@ class _AddContentScreenState extends State<AddContentScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.description),
               ),
-              maxLines: 4,
+              maxLines: 3,
             ),
             const SizedBox(height: 16),
-            
-            // Selector de categoría
-            Consumer<CategoryProvider>(
-              builder: (context, categoryProvider, child) {
-                if (categoryProvider.categories.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                
-                return DropdownButtonFormField<String>(
-                  value: _selectedCategoryId,
-                  decoration: const InputDecoration(
-                    labelText: 'Categoría',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.category),
-                  ),
-                  items: [
-                    const DropdownMenuItem(
-                      value: null,
-                      child: Text('Sin categoría'),
-                    ),
-                    ...categoryProvider.categories.map((category) {
-                      return DropdownMenuItem(
-                        value: category.id,
-                        child: Text(category.name),
-                      );
-                    }).toList(),
-                  ],
-                  onChanged: (value) {
-                    setState(() => _selectedCategoryId = value);
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            
             TextFormField(
-              controller: _thumbnailUrlController,
+              controller: _imageUrlController,
               decoration: const InputDecoration(
-                labelText: 'URL de Miniatura',
+                labelText: 'URL de Imagen *',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.image),
                 hintText: 'https://ejemplo.com/imagen.jpg',
               ),
               validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'La URL de imagen es requerida';
+                }
+                if (!value.startsWith('http')) {
+                  return 'Debe ser una URL válida';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _linkUrlController,
+              decoration: const InputDecoration(
+                labelText: 'URL de Enlace (opcional)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.link),
+                hintText: 'https://ejemplo.com',
+              ),
+              validator: (value) {
                 if (value != null && value.trim().isNotEmpty) {
                   if (!value.startsWith('http')) {
                     return 'Debe ser una URL válida';
@@ -180,40 +149,18 @@ class _AddContentScreenState extends State<AddContentScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _audioUrlController,
+              controller: _orderController,
               decoration: const InputDecoration(
-                labelText: 'URL de Audio',
+                labelText: 'Orden de Posición',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.audiotrack),
-                hintText: 'https://ejemplo.com/audio.mp3',
+                prefixIcon: Icon(Icons.sort),
+                hintText: '0, 1, 2...',
               ),
+              keyboardType: TextInputType.number,
               validator: (value) {
                 if (value != null && value.trim().isNotEmpty) {
-                  if (!value.startsWith('http')) {
-                    return 'Debe ser una URL válida';
-                  }
-                }
-                // Validar que al menos haya audio o video
-                if ((value == null || value.trim().isEmpty) &&
-                    _videoUrlController.text.trim().isEmpty) {
-                  return 'Debe proporcionar al menos un audio o video';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _videoUrlController,
-              decoration: const InputDecoration(
-                labelText: 'URL de Video',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.videocam),
-                hintText: 'https://ejemplo.com/video.mp4',
-              ),
-              validator: (value) {
-                if (value != null && value.trim().isNotEmpty) {
-                  if (!value.startsWith('http')) {
-                    return 'Debe ser una URL válida';
+                  if (int.tryParse(value) == null) {
+                    return 'Debe ser un número';
                   }
                 }
                 return null;
@@ -221,8 +168,8 @@ class _AddContentScreenState extends State<AddContentScreen> {
             ),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text('Contenido Activo'),
-              subtitle: const Text('Visible para los usuarios'),
+              title: const Text('Banner Activo'),
+              subtitle: const Text('Visible en el carrusel'),
               value: _isActive,
               onChanged: (value) {
                 setState(() => _isActive = value);
@@ -230,7 +177,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _isLoading ? null : _saveContent,
+              onPressed: _isLoading ? null : _saveCarousel,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
@@ -241,7 +188,7 @@ class _AddContentScreenState extends State<AddContentScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Text(
-                      'Guardar Contenido',
+                      'Guardar Banner',
                       style: TextStyle(fontSize: 16),
                     ),
             ),
@@ -268,10 +215,10 @@ class _AddContentScreenState extends State<AddContentScreen> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      '• El título es obligatorio\n'
-                      '• Debe proporcionar al menos un audio o video\n'
-                      '• Las URLs deben comenzar con http:// o https://\n'
-                      '• Puedes usar servicios como Supabase Storage para alojar archivos',
+                      '• El título y la imagen son obligatorios\n'
+                      '• El orden define la posición en el carrusel\n'
+                      '• Tamaño recomendado: 1200x400 px\n'
+                      '• Formato: JPG, PNG, WEBP',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],
