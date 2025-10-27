@@ -12,7 +12,7 @@ class CarouselBanner extends StatefulWidget {
 }
 
 class _CarouselBannerState extends State<CarouselBanner> {
-  late PageController _pageController;
+  late PageController _pageController;  
   int _currentPage = 0;
 
   @override

@@ -15,8 +15,10 @@ class ContentCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.grey[900]!,
-            Colors.grey[850]!,
+            const Color.fromARGB(255, 255, 255, 249),
+            const Color.fromARGB(255, 255, 255, 251),
+            const Color.fromARGB(255, 255, 252, 246),
+            const Color.fromARGB(255, 255, 251, 243),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -53,14 +55,14 @@ class ContentCard extends StatelessWidget {
                             placeholder: (context, url) => Container(
                               width: 80,
                               height: 80,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.deepPurple[300]!,
-                                    Colors.deepPurple[600]!,
-                                  ],
-                                ),
-                              ),
+                              // decoration: BoxDecoration(
+                              //   gradient: LinearGradient(
+                              //     colors: [
+                              //       Colors.deepPurple[300]!,
+                              //       Colors.deepPurple[600]!,
+                              //     ],
+                              //   ),
+                              // ),
                               child: const Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
@@ -117,8 +119,8 @@ class ContentCard extends StatelessWidget {
                       // Título
                       Text(
                         content.title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Colors.grey[700],
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.2,
@@ -134,8 +136,8 @@ class ContentCard extends StatelessWidget {
                         Text(
                           content.description!,
                           style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 13,
+                            color: Colors.grey[600],
+                            fontSize: 15,
                             height: 1.3,
                           ),
                           maxLines: 1,
@@ -145,7 +147,7 @@ class ContentCard extends StatelessWidget {
                         Text(
                           'Programa de radio',
                           style: TextStyle(
-                            color: Colors.grey[400],
+                            color: Colors.grey[600],
                             fontSize: 13,
                           ),
                         ),
@@ -209,11 +211,12 @@ class ContentCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 255, 184, 41),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: const Color.fromARGB(255, 255, 255, 255)
+                            .withOpacity(0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -221,7 +224,7 @@ class ContentCard extends StatelessWidget {
                   ),
                   child: const Icon(
                     Icons.play_arrow_rounded,
-                    color: Colors.black,
+                    color: Color.fromARGB(255, 255, 255, 255),
                     size: 24,
                   ),
                 ),

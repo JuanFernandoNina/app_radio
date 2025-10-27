@@ -6,7 +6,6 @@ import '../providers/carousel_provider.dart';
 import '../widgets/content_card.dart';
 import '../widgets/carousel_banner.dart';
 import '../widgets/category_filter.dart';
-import 'admin/admin_login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,20 +38,21 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Radio App'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.admin_panel_settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.admin_panel_settings),
+        //     onPressed: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => const AdminLoginScreen()),
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       body: Consumer3<ContentProvider, CategoryProvider, CarouselProvider>(
-        builder: (context, contentProvider, categoryProvider, carouselProvider, child) {
+        builder: (context, contentProvider, categoryProvider, carouselProvider,
+            child) {
           if (contentProvider.isLoading || categoryProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -86,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
           // Filtrar contenido por categoría
           final filteredContents = _selectedCategoryId == null
               ? contentProvider.contents
-              : contentProvider.contents.where((c) => c.categoryId == _selectedCategoryId).toList();
+              : contentProvider.contents
+                  .where((c) => c.categoryId == _selectedCategoryId)
+                  .toList();
 
           return RefreshIndicator(
             onRefresh: () async {
