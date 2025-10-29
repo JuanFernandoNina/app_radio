@@ -59,11 +59,12 @@ class CategoryFilter extends StatelessWidget {
               selected: selectedCategoryId == null,
               onSelected: (_) => onCategorySelected(null),
               backgroundColor: Colors.grey[200],
-              selectedColor: Theme.of(context).primaryColor,
+              selectedColor: Colors.amber,
               labelStyle: TextStyle(
                 color: selectedCategoryId == null ? Colors.white : Colors.black,
                 fontWeight: FontWeight.bold,
               ),
+              checkmarkColor: Colors.white,
             ),
           ),
 
@@ -95,6 +96,7 @@ class CategoryFilter extends StatelessWidget {
                   color: isSelected ? Colors.white : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
+                checkmarkColor: Colors.white,
               ),
             );
           }).toList(),

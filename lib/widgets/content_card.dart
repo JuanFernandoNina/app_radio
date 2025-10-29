@@ -15,10 +15,10 @@ class ContentCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color.fromARGB(255, 255, 255, 249),
+            const Color.fromARGB(255, 255, 255, 226),
             const Color.fromARGB(255, 255, 255, 251),
             const Color.fromARGB(255, 255, 252, 246),
-            const Color.fromARGB(255, 255, 251, 243),
+            const Color.fromARGB(255, 255, 244, 224),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -45,7 +45,7 @@ class ContentCard extends StatelessWidget {
                 Hero(
                   tag: 'content-${content.id}',
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(15),
                     child: content.thumbnailUrl != null
                         ? CachedNetworkImage(
                             imageUrl: content.thumbnailUrl!,
@@ -94,8 +94,8 @@ class ContentCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Colors.deepPurple[400]!,
-                                  Colors.deepPurple[700]!,
+                                  Colors.amber[400]!,
+                                  Colors.amber[700]!,
                                 ],
                               ),
                             ),
@@ -120,9 +120,9 @@ class ContentCard extends StatelessWidget {
                       Text(
                         content.title,
                         style: TextStyle(
-                          color: Colors.grey[700],
+                          color: Colors.grey[800],
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 0.2,
                         ),
                         maxLines: 2,
@@ -210,21 +210,21 @@ class ContentCard extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 184, 41),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromARGB(255, 255, 255, 255)
-                            .withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                  // decoration: BoxDecoration(
+                  //   color: const Color.fromARGB(255, 255, 184, 41),
+                  //   shape: BoxShape.circle,
+                  //   boxShadow: [
+                  //     BoxShadow(
+                  //       color: const Color.fromARGB(255, 255, 255, 255)
+                  //           .withOpacity(0.3),
+                  //       blurRadius: 8,
+                  //       offset: const Offset(0, 2),
+                  //     ),
+                  //   ],
+                  // ),
                   child: const Icon(
-                    Icons.play_arrow_rounded,
-                    color: Color.fromARGB(255, 255, 255, 255),
+                    Icons.arrow_forward_ios,
+                    color: Color.fromARGB(255, 255, 166, 0),
                     size: 24,
                   ),
                 ),

@@ -3,12 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:radio_app/screens/EventsScreen.dart';
 import 'package:radio_app/screens/MembersScreen.dart';
 import 'package:radio_app/screens/MusicScreen.dart';
+import 'package:radio_app/screens/home_screen.dart';
 import 'providers/content_provider.dart';
 import 'providers/category_provider.dart'; // ← AGREGA ESTE
 import 'providers/carousel_provider.dart'; // ← AGREGA ESTE
 import 'services/supabase_service.dart';
-import 'screens/home_screen.dart';
-
 import 'screens/admin/admin_login_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
@@ -68,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     HomeScreen(), // Pantalla de Inicio con el reproductor
     MembersScreen(), // Pantalla de Miembros
-    MusicScreen(), // Pantalla de Música
+    GruposScreen(), // Pantalla de Música
     EventsScreen(), // Pantalla de Eventos
   ];
 

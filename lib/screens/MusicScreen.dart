@@ -3,26 +3,32 @@ import 'package:provider/provider.dart';
 import '../providers/content_provider.dart';
 import '../providers/category_provider.dart';
 import '../widgets/content_card.dart';
-import '../widgets/category_filter.dart';
+import '../models/category.dart';
 
-class MusicScreen extends StatefulWidget {
-  const MusicScreen({super.key});
+class GruposScreen extends StatefulWidget {
+  const GruposScreen({super.key});
 
   @override
-  State<MusicScreen> createState() => _MusicScreenState();
+  State<GruposScreen> createState() => _GruposScreenState();
 }
 
-class _MusicScreenState extends State<MusicScreen> {
+class _GruposScreenState extends State<GruposScreen> {
   String? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
-    // Cargar datos cuando se monta la pantalla
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ContentProvider>().loadActiveContent();
       context.read<CategoryProvider>().loadCategories();
     });
+  }
+
+  // Filtrar categorías que pertenecen a "grupos" o "both"
+  List<Category> _getGruposCategories(List<Category> allCategories) {
+    return allCategories
+        .where((cat) => cat.screen == 'grupos' || cat.screen == 'both')
+        .toList();
   }
 
   void _filterByCategory(String? categoryId) {
@@ -34,9 +40,7 @@ class _MusicScreenState extends State<MusicScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: const Text(
           'Grupos',
           style: TextStyle(
@@ -47,7 +51,6 @@ class _MusicScreenState extends State<MusicScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // TODO: Implementar búsqueda
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Búsqueda próximamente')),
               );
@@ -88,12 +91,29 @@ class _MusicScreenState extends State<MusicScreen> {
             );
           }
 
-          // Filtrar contenido por categoría
-          final filteredContents = _selectedCategoryId == null
-              ? contentProvider.contents
-              : contentProvider.contents
-                  .where((c) => c.categoryId == _selectedCategoryId)
-                  .toList();
+          // Obtener solo las categorías de grupos
+          final gruposCategories =
+              _getGruposCategories(categoryProvider.categories);
+
+          // Obtener IDs de las categorías de grupos
+          final gruposCategoryIds = gruposCategories.map((c) => c.id).toList();
+
+          // Filtrar contenido: solo mostrar contenido de categorías de grupos
+          List filteredContents;
+
+          if (_selectedCategoryId != null) {
+            // Si hay una categoría seleccionada, filtrar por ella
+            filteredContents = contentProvider.contents
+                .where((c) => c.categoryId == _selectedCategoryId)
+                .toList();
+          } else {
+            // Si no hay categoría seleccionada, mostrar TODO el contenido de grupos
+            filteredContents = contentProvider.contents
+                .where((c) =>
+                    c.categoryId != null &&
+                    gruposCategoryIds.contains(c.categoryId))
+                .toList();
+          }
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -111,19 +131,19 @@ class _MusicScreenState extends State<MusicScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Explora por Grupos',
                           style: TextStyle(
-                            color: const Color.fromARGB(255, 70, 70, 70),
+                            color: Colors.white,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Encuentra contenido organizado por categorías',
+                          'Contenido organizado en ${gruposCategories.length} categorías',
                           style: TextStyle(
-                            color: Colors.grey[500],
+                            color: Colors.grey[400],
                             fontSize: 14,
                           ),
                         ),
@@ -132,32 +152,89 @@ class _MusicScreenState extends State<MusicScreen> {
                   ),
                 ),
 
-                // Filtro de categorías
-                if (categoryProvider.categories.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: CategoryFilter(
-                        categories: categoryProvider.categories,
-                        selectedCategoryId: _selectedCategoryId,
-                        onCategorySelected: _filterByCategory,
+                // Grid de categorías (tipo Spotify)
+                if (gruposCategories.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverGrid(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.5,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final category = gruposCategories[index];
+                          final isSelected = _selectedCategoryId == category.id;
+
+                          // Contar contenido por categoría
+                          final contentCount = contentProvider.contents
+                              .where((c) => c.categoryId == category.id)
+                              .length;
+
+                          return _buildCategoryCard(
+                            category: category,
+                            contentCount: contentCount,
+                            isSelected: isSelected,
+                            onTap: () {
+                              _filterByCategory(
+                                  isSelected ? null : category.id);
+                            },
+                          );
+                        },
+                        childCount: gruposCategories.length,
                       ),
                     ),
                   ),
 
-                // Contador de resultados
+                // Botón "Ver todos"
+                if (_selectedCategoryId != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: TextButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategoryId = null;
+                          });
+                        },
+                        icon: const Icon(Icons.grid_view,
+                            color: Colors.deepPurple),
+                        label: const Text(
+                          'Ver todas las categorías',
+                          style: TextStyle(color: Colors.deepPurple),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Título de contenido
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    child: Text(
-                      _selectedCategoryId == null
-                          ? 'Mostrando todos (${filteredContents.length})'
-                          : 'Encontrados: ${filteredContents.length}',
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 13,
-                      ),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          _selectedCategoryId == null
+                              ? 'Todo el contenido'
+                              : 'Contenido de ${gruposCategories.firstWhere((c) => c.id == _selectedCategoryId).name}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '(${filteredContents.length})',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -176,9 +253,7 @@ class _MusicScreenState extends State<MusicScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            _selectedCategoryId == null
-                                ? 'No hay contenido disponible'
-                                : 'No hay contenido en esta categoría',
+                            'No hay contenido en esta categoría',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[500],
@@ -218,6 +293,122 @@ class _MusicScreenState extends State<MusicScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard({
+    required Category category,
+    required int contentCount,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    // Parsear color
+    Color categoryColor;
+    try {
+      categoryColor = category.color != null
+          ? Color(int.parse(category.color!.replaceFirst('#', '0xFF')))
+          : Colors.deepPurple;
+    } catch (e) {
+      categoryColor = Colors.deepPurple;
+    }
+
+    // Parsear icono
+    IconData categoryIcon;
+    switch (category.icon) {
+      case 'music_note':
+        categoryIcon = Icons.music_note;
+        break;
+      case 'newspaper':
+        categoryIcon = Icons.newspaper;
+        break;
+      case 'sports_soccer':
+        categoryIcon = Icons.sports_soccer;
+        break;
+      case 'mic':
+        categoryIcon = Icons.mic;
+        break;
+      case 'podcasts':
+        categoryIcon = Icons.podcasts;
+        break;
+      case 'live_tv':
+        categoryIcon = Icons.live_tv;
+        break;
+      case 'star':
+        categoryIcon = Icons.star;
+        break;
+      default:
+        categoryIcon = Icons.category;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isSelected
+                  ? [categoryColor, categoryColor.withOpacity(0.7)]
+                  : [
+                      categoryColor.withOpacity(0.3),
+                      categoryColor.withOpacity(0.1)
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border:
+                isSelected ? Border.all(color: categoryColor, width: 2) : null,
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(
+                    categoryIcon,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                  if (isSelected)
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    category.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$contentCount contenidos',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

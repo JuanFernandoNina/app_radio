@@ -3,6 +3,7 @@ class Category {
   final String name;
   final String? icon;
   final String? color;
+  final String screen; // 'home', 'grupos', 'both'
   final DateTime createdAt;
 
   Category({
@@ -10,6 +11,7 @@ class Category {
     required this.name,
     this.icon,
     this.color,
+    this.screen = 'home',
     required this.createdAt,
   });
 
@@ -19,6 +21,7 @@ class Category {
       name: json['name'],
       icon: json['icon'],
       color: json['color'],
+      screen: json['screen'] ?? 'home',
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -28,6 +31,7 @@ class Category {
       'name': name,
       'icon': icon,
       'color': color,
+      'screen': screen,
     };
   }
 }
