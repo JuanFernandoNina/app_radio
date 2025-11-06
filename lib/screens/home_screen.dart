@@ -12,13 +12,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   static const _primaryColor = Color.fromARGB(255, 255, 166, 0);
+
+  // ✅ Tu stream original
   static const _streamUrl = "https://stream.zeno.fm/rihjsl5lkhmuv";
+
+  // ✅ Stream de respaldo (funciona mejor en emuladores)
+  static const _backupStreamUrl = "https://icecast.radiofrance.fr/fip-hifi.aac";
+
   static const _radioLogo = "https://i.postimg.cc/xTmMhR4m/img-radio.png";
 
   late final AudioPlayer _player;
   double _volume = 0.5;
   bool _isInitializing = true;
   String _statusMessage = 'Cargando radio...';
+  bool _usingBackupStream = false;
 
   final List<Map<String, String>> _socialMedia = [
     {"icon": "assets/Icon/facebook.png", "url": "https://facebook.com"},
@@ -46,15 +53,68 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _isInitializing = true;
-      _statusMessage = 'Conectando al servidor...';
+      _statusMessage = 'Conectando a Radio Chacaltaya...';
     });
 
+    String urlToTry = _streamUrl;
+
+    // ✅ Intentar con el stream principal primero
+    bool success = await _tryLoadStream(urlToTry);
+
+    // ✅ Si falla, intentar con stream de respaldo (solo para pruebas en emulador)
+    if (!success) {
+      debugPrint("⚠️ Stream principal falló, intentando respaldo...");
+      setState(() {
+        _statusMessage = 'Probando conexión alternativa...';
+        _usingBackupStream = true;
+      });
+
+      urlToTry = _backupStreamUrl;
+      success = await _tryLoadStream(urlToTry);
+    }
+
+    if (mounted) {
+      if (success) {
+        await _player.setVolume(_volume);
+        debugPrint("🔊 Volumen configurado: $_volume");
+
+        setState(() {
+          _statusMessage =
+              _usingBackupStream ? '¡Modo prueba activado!' : '¡Radio lista!';
+        });
+
+        if (_usingBackupStream) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                '⚠️ Usando stream de prueba. Prueba en dispositivo físico para mejor experiencia.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+      } else {
+        setState(() {
+          _statusMessage = 'Error de conexión';
+        });
+
+        _showErrorDialog();
+      }
+
+      await Future.delayed(const Duration(milliseconds: 500));
+      setState(() => _isInitializing = false);
+    }
+  }
+
+  Future<bool> _tryLoadStream(String url) async {
     try {
-      // ✅ SOLUCIÓN 1: Timeout más largo para streams
+      debugPrint("🎵 Intentando cargar: $url");
+
       await _player
           .setAudioSource(
         AudioSource.uri(
-          Uri.parse(_streamUrl),
+          Uri.parse(url),
           tag: MediaItem(
             id: '1',
             album: "Radio Chacaltaya",
@@ -64,60 +124,60 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       )
           .timeout(
-        const Duration(seconds: 30), // ✅ 30 segundos para streams
+        const Duration(seconds: 15), // ✅ Reducido a 15 seg para fallar rápido
         onTimeout: () {
-          debugPrint("⚠️ Timeout: El servidor tardó demasiado");
-          throw Exception('El servidor no responde. Verifica tu conexión.');
+          throw Exception('Timeout al conectar');
         },
       );
 
-      if (mounted) {
-        setState(() {
-          _statusMessage = '¡Radio lista!';
-        });
-      }
-
-      debugPrint("✅ Audio player inicializado correctamente");
+      debugPrint("✅ Stream cargado exitosamente: $url");
+      return true;
     } catch (e) {
-      debugPrint("❌ Error al inicializar: $e");
-
-      if (mounted) {
-        setState(() {
-          _statusMessage = 'Error al cargar';
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    e.toString().contains('Timeout')
-                        ? 'Conexión lenta. Verifica tu internet.'
-                        : 'Error al cargar la radio.',
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.redAccent,
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'REINTENTAR',
-              textColor: Colors.white,
-              onPressed: _initAudioPlayer,
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        // ✅ SOLUCIÓN 2: Delay antes de quitar el loader
-        await Future.delayed(const Duration(milliseconds: 500));
-        setState(() => _isInitializing = false);
-      }
+      debugPrint("❌ Error con $url: $e");
+      return false;
     }
+  }
+
+  void _showErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.signal_wifi_off, color: Colors.red),
+            SizedBox(width: 12),
+            Text('Error de Conexión'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'No se pudo conectar a la radio. Posibles causas:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 12),
+            Text('• Estás usando un emulador (usa dispositivo físico)'),
+            Text('• Conexión a internet lenta o inestable'),
+            Text('• El servidor de radio está caído'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _initAudioPlayer();
+            },
+            child: const Text('REINTENTAR'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _launchUrl(String url) async {
@@ -177,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ✅ SOLUCIÓN 3: Loading overlay mejorado
   Widget _buildLoadingOverlay() {
     return Container(
       color: Colors.black45,
@@ -187,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 20,
@@ -214,6 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
@@ -222,6 +282,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.grey[600],
                   fontSize: 13,
                 ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),

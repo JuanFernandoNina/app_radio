@@ -46,7 +46,6 @@ class _MembersScreenState extends State<MembersScreen> {
         centerTitle: true,
         title: Column(
           children: [
-            const SizedBox(height: 8),
             const Text(
               'CHACALTAYA',
               style: TextStyle(
@@ -71,7 +70,7 @@ class _MembersScreenState extends State<MembersScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        toolbarHeight: 90,
+        toolbarHeight: 70,
       ),
       body: Consumer3<ContentProvider, CategoryProvider, CarouselProvider>(
         builder: (context, contentProvider, categoryProvider, carouselProvider,
@@ -167,10 +166,43 @@ class _MembersScreenState extends State<MembersScreen> {
                 if (carouselProvider.items.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 16, bottom: 25),
+                      padding: const EdgeInsets.only(top: 16, bottom: 15),
                       child: CarouselBanner(items: carouselProvider.items),
                     ),
                   ),
+
+                // Texto descriptivo de categorías
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Explora por categorías',
+                          style: TextStyle(
+                            color: Colors.grey[900],
+                            fontSize: 25,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Filtra el contenido por tu categoría favorita',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            height: 1.5,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // Filtro de categorías
                 if (categoryProvider.categories.isNotEmpty)

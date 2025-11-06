@@ -45,7 +45,6 @@ class _GruposScreenState extends State<GruposScreen> {
         centerTitle: true,
         title: Column(
           children: [
-            const SizedBox(height: 8),
             const Text(
               'CHACALTAYA',
               style: TextStyle(
@@ -70,7 +69,7 @@ class _GruposScreenState extends State<GruposScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        toolbarHeight: 80,
+        toolbarHeight: 70,
       ),
       body: Consumer2<ContentProvider, CategoryProvider>(
         builder: (context, contentProvider, categoryProvider, child) {
@@ -210,20 +209,16 @@ class _GruposScreenState extends State<GruposScreen> {
                   ),
                 ),
 
-                // Grid de categorías (tipo Spotify)
+                // Lista horizontal de categorías
                 if (gruposCategories.isNotEmpty)
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.5,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 140,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: gruposCategories.length,
+                        itemBuilder: (context, index) {
                           final category = gruposCategories[index];
                           final isSelected = _selectedCategoryId == category.id;
 
@@ -232,17 +227,25 @@ class _GruposScreenState extends State<GruposScreen> {
                               .where((c) => c.categoryId == category.id)
                               .length;
 
-                          return _buildCategoryCard(
-                            category: category,
-                            contentCount: contentCount,
-                            isSelected: isSelected,
-                            onTap: () {
-                              _filterByCategory(
-                                  isSelected ? null : category.id);
-                            },
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right:
+                                  index < gruposCategories.length - 1 ? 12 : 0,
+                            ),
+                            child: SizedBox(
+                              width: 160,
+                              child: _buildCategoryCard(
+                                category: category,
+                                contentCount: contentCount,
+                                isSelected: isSelected,
+                                onTap: () {
+                                  _filterByCategory(
+                                      isSelected ? null : category.id);
+                                },
+                              ),
+                            ),
                           );
                         },
-                        childCount: gruposCategories.length,
                       ),
                     ),
                   ),
@@ -407,36 +410,60 @@ class _GruposScreenState extends State<GruposScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color:
                 isSelected ? const Color(0xFFFFB700) : const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: const Color(0xFFFFB700).withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    categoryIcon,
-                    color: isSelected
-                        ? const Color.fromARGB(255, 255, 255, 255)
-                        : const Color.fromARGB(255, 153, 153, 153),
-                    size: 32,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.2)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      categoryIcon,
+                      color: isSelected
+                          ? Colors.white
+                          : const Color.fromARGB(255, 143, 143, 143),
+                      size: 28,
+                    ),
                   ),
                   if (isSelected)
-                    const Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                      size: 20,
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                 ],
               ),
+              const Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
