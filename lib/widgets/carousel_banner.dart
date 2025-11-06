@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
 import '../models/carousel_item.dart';
 
 class CarouselBanner extends StatefulWidget {
@@ -15,11 +18,22 @@ class _CarouselBannerState extends State<CarouselBanner> {
   late PageController _pageController;
   int _currentPage = 0;
   bool _isAutoPlaying = true;
+  Timer? _autoPlayTimer;
+
+  // Design constants
+  static const double _kHeight = 220;
+  static const double _kViewportFraction = 0.85;
+  static const Color _kAccent = Colors.amber;
+  static const Color _kOnAccent = Colors.white;
+  static const Color _kInactiveDot = Color(0xFF616161);
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.85, initialPage: 0);
+    _pageController = PageController(
+      viewportFraction: _kViewportFraction,
+      initialPage: 0,
+    );
 
     if (widget.items.isNotEmpty) {
       _startAutoPlay();
@@ -27,28 +41,31 @@ class _CarouselBannerState extends State<CarouselBanner> {
   }
 
   void _startAutoPlay() {
-    Future.delayed(const Duration(seconds: 4), () {
+    // Use a cancellable Timer instead of recursive Future.delayed
+    _autoPlayTimer?.cancel();
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted || !_isAutoPlaying) return;
 
-      if (_currentPage < widget.items.length - 1) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
+      setState(() {
+        if (_currentPage < widget.items.length - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0;
+        }
+      });
 
       _pageController.animateToPage(
         _currentPage,
         duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutCubic,
       );
-
-      _startAutoPlay();
     });
   }
 
   @override
   void dispose() {
     _isAutoPlaying = false;
+    _autoPlayTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -60,7 +77,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
     return Column(
       children: [
         SizedBox(
-          height: 220,
+          height: _kHeight,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.items.length,
@@ -81,7 +98,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
 
                   return Center(
                     child: SizedBox(
-                      height: Curves.easeOut.transform(value) * 220,
+                      height: Curves.easeOut.transform(value) * _kHeight,
                       child: child,
                     ),
                   );
@@ -104,7 +121,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
               width: _currentPage == index ? 24 : 8,
               height: 8,
               decoration: BoxDecoration(
-                color: _currentPage == index ? Colors.amber : Colors.grey[700],
+                color: _currentPage == index ? _kAccent : _kInactiveDot,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -133,7 +150,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
             boxShadow: [
               BoxShadow(
                 color: isActive
-                    ? Colors.amber.withOpacity(0.4)
+                    ? const Color.fromARGB(255, 255, 249, 199).withOpacity(0.4)
                     : Colors.black.withOpacity(0.3),
                 blurRadius: isActive ? 20 : 10,
                 spreadRadius: isActive ? 2 : 0,
@@ -146,40 +163,41 @@ class _CarouselBannerState extends State<CarouselBanner> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // Imagen con efecto parallax
+                // Imagen con acceso semántico y caché
                 Transform.scale(
-                  scale: 1.1,
-                  child: CachedNetworkImage(
-                    imageUrl: item.imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.amber[700]!,
-                            Colors.amber[900]!,
-                          ],
+                  scale: 1.06,
+                  child: Semantics(
+                    label: item.title,
+                    child: CachedNetworkImage(
+                      imageUrl: item.imageUrl,
+                      fit: BoxFit.cover,
+                      fadeInDuration: const Duration(milliseconds: 300),
+                      memCacheWidth: 1000,
+                      memCacheHeight: 800,
+                      placeholder: (context, url) => Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.amber,
+                              Colors.amberAccent,
+                            ],
+                          ),
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: _kOnAccent,
+                          ),
                         ),
                       ),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.shade900,
+                        child: const Center(
+                          child: Icon(
+                            Icons.broken_image,
+                            size: 44,
+                            color: Colors.white54,
+                          ),
                         ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.grey[800]!,
-                            Colors.grey[900]!,
-                          ],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.error,
-                        size: 50,
-                        color: Colors.white54,
                       ),
                     ),
                   ),
@@ -212,11 +230,11 @@ class _CarouselBannerState extends State<CarouselBanner> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber,
+                        color: _kAccent,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.amber.withOpacity(0.5),
+                            color: _kAccent.withOpacity(0.5),
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),
@@ -225,7 +243,9 @@ class _CarouselBannerState extends State<CarouselBanner> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.stars, size: 14, color: Colors.black),
+                          Icon(Icons.stars,
+                              size: 14,
+                              color: Color.fromARGB(255, 255, 225, 225)),
                           SizedBox(width: 4),
                           Text(
                             'NUEVO',
@@ -259,7 +279,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                           Text(
                             item.title,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: _kOnAccent,
                               fontSize: isActive ? 20 : 18,
                               fontWeight: FontWeight.bold,
                               shadows: [
@@ -279,7 +299,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                             Text(
                               item.description!,
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                                color: _kOnAccent.withOpacity(0.9),
                                 fontSize: 14,
                                 height: 1.3,
                                 shadows: [
@@ -304,7 +324,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.amber,
+                                color: _kAccent,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Row(

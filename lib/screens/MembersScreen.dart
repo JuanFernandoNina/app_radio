@@ -20,10 +20,13 @@ class _MembersScreenState extends State<MembersScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ContentProvider>().loadActiveContent();
-      context.read<CategoryProvider>().loadCategories();
-      context.read<CarouselProvider>().loadActiveCarousel();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Mostrar la pantalla enseguida y cargar en segundo plano
+      Future.microtask(() {
+        context.read<ContentProvider>().loadActiveContent();
+        context.read<CategoryProvider>().loadCategories();
+        context.read<CarouselProvider>().loadActiveCarousel();
+      });
     });
   }
 
@@ -33,26 +36,52 @@ class _MembersScreenState extends State<MembersScreen> {
     });
   }
 
+  static const Color _kAccent = Colors.amber;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-          title: Text(
-        'Chacaltaya Miembros',
-        style: TextStyle(
-          color: Colors.grey[900],
-          fontSize: 25,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Open Sans',
+        centerTitle: true,
+        title: Column(
+          children: [
+            const SizedBox(height: 8),
+            const Text(
+              'CHACALTAYA',
+              style: TextStyle(
+                color: _kAccent,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 4,
+                fontFamily: 'Inter',
+              ),
+            ),
+            Text(
+              'MIEMBROS',
+              style: TextStyle(
+                color: Colors.grey[900],
+                fontSize: 25,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
         ),
-      )
-          // Botón de admin eliminado - ahora usarás el panel web
-          ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 90,
+      ),
       body: Consumer3<ContentProvider, CategoryProvider, CarouselProvider>(
         builder: (context, contentProvider, categoryProvider, carouselProvider,
             child) {
           if (contentProvider.isLoading || categoryProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(_kAccent),
+              ),
+            );
           }
 
           if (contentProvider.error != null) {
@@ -60,43 +89,57 @@ class _MembersScreenState extends State<MembersScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline,
-                      size: 64, color: const Color.fromARGB(255, 255, 174, 0)),
+                  Icon(Icons.error_outline, size: 64, color: _kAccent),
                   const SizedBox(height: 16),
                   Text(
-                    'Oops!',
+                    'Sin conexión',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey[900],
-                      fontSize: 25,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Open Sans',
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      fontFamily: 'Inter',
                     ),
                   ),
+                  const SizedBox(height: 8),
                   Text(
-                    'No hay conexión a Internet.\nPor favor, verifica tu conexión e intenta nuevamente.',
+                    'Verifica tu conexión a Internet\ne intenta nuevamente',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey[600],
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Open Sans',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                      fontFamily: 'Inter',
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
                       contentProvider.loadActiveContent();
                       categoryProvider.loadCategories();
                       carouselProvider.loadActiveCarousel();
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _kAccent,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                     child: const Text(
-                      'Reintentar',
+                      'REINTENTAR',
                       style: TextStyle(
-                        color: Colors.amber,
+                        color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        fontFamily: 'Open Sans',
+                        letterSpacing: 1,
+                        fontFamily: 'Inter',
                       ),
                     ),
                   )
@@ -147,16 +190,26 @@ class _MembersScreenState extends State<MembersScreen> {
 
                 // Lista de contenido
                 if (filteredContents.isEmpty)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.radio, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
+                          Icon(
+                            Icons.radio,
+                            size: 64,
+                            color: Colors.grey[300],
+                          ),
+                          const SizedBox(height: 16),
                           Text(
-                            'No hay contenido disponible',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            'Sin contenido disponible',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                              fontFamily: 'Inter',
+                            ),
                           ),
                         ],
                       ),

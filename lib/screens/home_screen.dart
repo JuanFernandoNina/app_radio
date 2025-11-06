@@ -11,7 +11,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Constantes para colores y URLs
   static const _primaryColor = Color.fromARGB(255, 255, 166, 0);
   static const _streamUrl = "https://stream.zeno.fm/rihjsl5lkhmuv";
   static const _radioLogo = "https://i.postimg.cc/xTmMhR4m/img-radio.png";
@@ -19,13 +18,13 @@ class _HomeScreenState extends State<HomeScreen> {
   late final AudioPlayer _player;
   double _volume = 0.5;
   bool _isInitializing = true;
+  String _statusMessage = 'Cargando radio...';
 
-  // Datos de redes sociales
   final List<Map<String, String>> _socialMedia = [
     {"icon": "assets/Icon/facebook.png", "url": "https://facebook.com"},
     {
       "icon": "assets/Icon/whassapp.png",
-      "url": "https://wa.me/yourphonenumber",
+      "url": "https://wa.me/yourphonenumber"
     },
     {"icon": "assets/Icon/instagram.png", "url": "https://instagram.com"},
     {"icon": "assets/Icon/facebook.png", "url": "https://tusitioweb.com"},
@@ -35,12 +34,25 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _player = AudioPlayer();
-    _initAudioPlayer();
+
+    // ✅ Inicializar DESPUÉS de que el widget se construya
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initAudioPlayer();
+    });
   }
 
   Future<void> _initAudioPlayer() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isInitializing = true;
+      _statusMessage = 'Conectando al servidor...';
+    });
+
     try {
-      await _player.setAudioSource(
+      // ✅ SOLUCIÓN 1: Timeout más largo para streams
+      await _player
+          .setAudioSource(
         AudioSource.uri(
           Uri.parse(_streamUrl),
           tag: MediaItem(
@@ -50,11 +62,59 @@ class _HomeScreenState extends State<HomeScreen> {
             artUri: Uri.parse(_radioLogo),
           ),
         ),
+      )
+          .timeout(
+        const Duration(seconds: 30), // ✅ 30 segundos para streams
+        onTimeout: () {
+          debugPrint("⚠️ Timeout: El servidor tardó demasiado");
+          throw Exception('El servidor no responde. Verifica tu conexión.');
+        },
       );
+
+      if (mounted) {
+        setState(() {
+          _statusMessage = '¡Radio lista!';
+        });
+      }
+
+      debugPrint("✅ Audio player inicializado correctamente");
     } catch (e) {
-      debugPrint("Error initializing audio player: $e");
+      debugPrint("❌ Error al inicializar: $e");
+
+      if (mounted) {
+        setState(() {
+          _statusMessage = 'Error al cargar';
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    e.toString().contains('Timeout')
+                        ? 'Conexión lenta. Verifica tu internet.'
+                        : 'Error al cargar la radio.',
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'REINTENTAR',
+              textColor: Colors.white,
+              onPressed: _initAudioPlayer,
+            ),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
+        // ✅ SOLUCIÓN 2: Delay antes de quitar el loader
+        await Future.delayed(const Duration(milliseconds: 500));
         setState(() => _isInitializing = false);
       }
     }
@@ -82,12 +142,8 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: _buildBackgroundDecoration(),
         child: Stack(
           children: [
-            if (_isInitializing)
-              const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              )
-            else
-              _buildMainContent(),
+            _buildMainContent(),
+            if (_isInitializing) _buildLoadingOverlay(),
             _buildPlayerControls(),
           ],
         ),
@@ -121,12 +177,65 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ✅ SOLUCIÓN 3: Loading overlay mejorado
+  Widget _buildLoadingOverlay() {
+    return Container(
+      color: Colors.black45,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 50,
+                height: 50,
+                child: CircularProgressIndicator(
+                  color: _primaryColor,
+                  strokeWidth: 4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _statusMessage,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Esto puede tardar unos segundos...',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMainContent() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 5), // Espacio para el AppBar
+          const SizedBox(height: 5),
           _buildRadioImageCard(),
           const SizedBox(height: 10),
           _buildRadioInfo(),
@@ -274,15 +383,17 @@ class _HomeScreenState extends State<HomeScreen> {
       stream: _player.playerStateStream,
       builder: (context, snapshot) {
         final isPlaying = snapshot.data?.playing ?? false;
+        final processingState =
+            snapshot.data?.processingState ?? ProcessingState.idle;
+        final isLoading = processingState == ProcessingState.loading ||
+            processingState == ProcessingState.buffering;
+
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: const Icon(
-                Icons.skip_previous,
-                size: 35,
-                color: Colors.black54,
-              ),
+              icon: const Icon(Icons.skip_previous,
+                  size: 35, color: Colors.black54),
               onPressed: () {},
             ),
             const SizedBox(width: 15),
@@ -293,20 +404,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 backgroundColor: Colors.deepPurple,
                 elevation: 8,
               ),
-              onPressed: () => isPlaying ? _player.pause() : _player.play(),
-              child: Icon(
-                isPlaying ? Icons.pause : Icons.play_arrow,
-                size: 35,
-                color: Colors.white,
+              onPressed: (_isInitializing || isLoading)
+                  ? null
+                  : () {
+                      if (isPlaying) {
+                        _player.pause();
+                      } else {
+                        _player.play();
+                      }
+                    },
+              child: SizedBox(
+                width: 35,
+                height: 35,
+                child: (isLoading || _isInitializing)
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      )
+                    : Icon(
+                        isPlaying ? Icons.pause : Icons.play_arrow,
+                        size: 35,
+                        color: Colors.white,
+                      ),
               ),
             ),
             const SizedBox(width: 20),
             IconButton(
-              icon: const Icon(
-                Icons.skip_next,
-                size: 35,
-                color: Colors.black54,
-              ),
+              icon:
+                  const Icon(Icons.skip_next, size: 35, color: Colors.black54),
               onPressed: () {},
             ),
           ],

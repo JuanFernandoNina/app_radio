@@ -5,37 +5,64 @@ import 'package:radio_app/screens/MembersScreen.dart';
 import 'package:radio_app/screens/MusicScreen.dart';
 import 'package:radio_app/screens/home_screen.dart';
 import 'providers/content_provider.dart';
-import 'providers/category_provider.dart'; // ← AGREGA ESTE
-import 'providers/carousel_provider.dart'; // ← AGREGA ESTE
+import 'providers/category_provider.dart';
+import 'providers/carousel_provider.dart';
 import 'services/supabase_service.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Configura aquí tus credenciales de Supabase
-  await SupabaseService.initialize(
-    supabaseUrl: 'https://cvzscfcciaegdgnyrkgg.supabase.co',
-    supabaseAnonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2enNjZmNjaWFlZ2Rnbnlya2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTQwMjMsImV4cCI6MjA3NjM3MDAyM30.dmAE84YXEtc9667I3b31fehIn_m8-9DIyBGrpppDRMY',
-  );
-
+  // ✅ SOLUCIÓN: No esperar a Supabase, inicializar en paralelo
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isSupabaseInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initSupabase();
+  }
+
+  // ✅ Inicializar Supabase de forma asíncrona sin bloquear la UI
+  Future<void> _initSupabase() async {
+    try {
+      await SupabaseService.initialize(
+        supabaseUrl: 'https://cvzscfcciaegdgnyrkgg.supabase.co',
+        supabaseAnonKey:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2enNjZmNjaWFlZ2Rnbnlya2dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3OTQwMjMsImV4cCI6MjA3NjM3MDAyM30.dmAE84YXEtc9667I3b31fehIn_m8-9DIyBGrpppDRMY',
+      );
+
+      if (mounted) {
+        setState(() => _isSupabaseInitialized = true);
+      }
+      debugPrint('✅ Supabase initialized');
+    } catch (e) {
+      debugPrint('❌ Error initializing Supabase: $e');
+      // La app puede funcionar sin Supabase
+      if (mounted) {
+        setState(() => _isSupabaseInitialized = true);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ContentProvider()),
-        ChangeNotifierProvider(
-            create: (_) => CategoryProvider()), // ← AGREGA ESTE
-        ChangeNotifierProvider(
-            create: (_) => CarouselProvider()), // ← AGREGA ESTE
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => CarouselProvider()),
       ],
       child: MaterialApp(
         title: 'Radio Chacaltaya',
@@ -45,10 +72,71 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Montserrat',
         ),
         debugShowCheckedModeBanner: false,
-        home: const MainScreen(),
+        // ✅ Mostrar la app inmediatamente, Supabase carga en background
+        home:
+            _isSupabaseInitialized ? const MainScreen() : const _SplashScreen(),
         routes: {
           '/admin-login': (context) => const AdminLoginScreen(),
         },
+      ),
+    );
+  }
+}
+
+// ✅ Splash screen simple mientras carga Supabase
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 255, 208, 0),
+              Color.fromARGB(255, 233, 140, 0),
+              Color.fromARGB(255, 255, 166, 0),
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Aquí puedes poner tu logo
+              const Icon(
+                Icons.radio,
+                size: 100,
+                color: Colors.white,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Radio Chacaltaya',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 32),
+              const CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Cargando...',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -65,10 +153,10 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    HomeScreen(), // Pantalla de Inicio con el reproductor
-    MembersScreen(), // Pantalla de Miembros
-    GruposScreen(), // Pantalla de Música
-    EventsScreen(), // Pantalla de Eventos
+    HomeScreen(),
+    MembersScreen(),
+    GruposScreen(),
+    EventsScreen(),
   ];
 
   @override

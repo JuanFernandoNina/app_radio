@@ -8,22 +8,27 @@ class ContentCard extends StatelessWidget {
 
   const ContentCard({super.key, required this.content});
 
+  // Design constants
+  static const Color _kAccent = Colors.amber;
+  static const Color _kBackground = Colors.white;
+  static const double _kBorderRadius = 17;
+  static const double _kImageSize = 80.0;
+  static const double _kIconSize = 14.0;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            const Color.fromARGB(255, 255, 255, 226),
-            const Color.fromARGB(255, 255, 255, 251),
-            const Color.fromARGB(255, 255, 252, 246),
-            const Color.fromARGB(255, 255, 244, 224),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
+        color: _kBackground,
+        borderRadius: BorderRadius.circular(_kBorderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -36,51 +41,36 @@ class ContentCard extends StatelessWidget {
               ),
             );
           },
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(17),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                // Imagen cuadrada con bordes redondeados
                 Hero(
                   tag: 'content-${content.id}',
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(_kBorderRadius),
                     child: content.thumbnailUrl != null
                         ? CachedNetworkImage(
                             imageUrl: content.thumbnailUrl!,
-                            width: 80,
-                            height: 80,
+                            width: _kImageSize,
+                            height: _kImageSize,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              width: 80,
-                              height: 80,
-                              // decoration: BoxDecoration(
-                              //   gradient: LinearGradient(
-                              //     colors: [
-                              //       Colors.deepPurple[300]!,
-                              //       Colors.deepPurple[600]!,
-                              //     ],
-                              //   ),
-                              // ),
+                              width: _kImageSize,
+                              height: _kImageSize,
                               child: const Center(
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Colors.white,
+                                  valueColor:
+                                      AlwaysStoppedAnimation<Color>(_kAccent),
                                 ),
                               ),
                             ),
                             errorWidget: (context, url, error) => Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.grey[700]!,
-                                    Colors.grey[800]!,
-                                  ],
-                                ),
-                              ),
+                              width: _kImageSize,
+                              height: _kImageSize,
+                              color: _kAccent.withOpacity(0.1),
                               child: const Icon(
                                 Icons.radio,
                                 color: Colors.white54,
@@ -89,14 +79,13 @@ class ContentCard extends StatelessWidget {
                             ),
                           )
                         : Container(
-                            width: 80,
-                            height: 80,
+                            width: _kImageSize,
+                            height: _kImageSize,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.amber[400]!,
-                                  Colors.amber[700]!,
-                                ],
+                              color: _kAccent.withOpacity(0.15),
+                              border: Border.all(
+                                color: _kAccent.withOpacity(0.3),
+                                width: 1,
                               ),
                             ),
                             child: const Icon(
@@ -107,16 +96,12 @@ class ContentCard extends StatelessWidget {
                           ),
                   ),
                 ),
-
                 const SizedBox(width: 16),
-
-                // Información del contenido
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Título
                       Text(
                         content.title,
                         style: TextStyle(
@@ -128,10 +113,7 @@ class ContentCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-
                       const SizedBox(height: 4),
-
-                      // Descripción o categoría
                       if (content.description != null)
                         Text(
                           content.description!,
@@ -151,29 +133,25 @@ class ContentCard extends StatelessWidget {
                             fontSize: 13,
                           ),
                         ),
-
                       const SizedBox(height: 6),
-
-                      // Stats o tipo de media
                       Row(
                         children: [
-                          // Icono de tipo de media
                           if (content.audioUrl != null) ...[
                             Icon(
                               Icons.audiotrack,
-                              size: 14,
-                              color: Colors.grey[500],
+                              size: _kIconSize,
+                              color: Colors.amber[600],
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Audio',
                               style: TextStyle(
-                                color: Colors.grey[500],
+                                color: Colors.amber[600],
                                 fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
-
                           if (content.videoUrl != null) ...[
                             if (content.audioUrl != null) ...[
                               const SizedBox(width: 8),
@@ -188,15 +166,16 @@ class ContentCard extends StatelessWidget {
                             ],
                             Icon(
                               Icons.videocam,
-                              size: 14,
-                              color: Colors.grey[500],
+                              size: _kIconSize,
+                              color: Colors.amber[600],
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Video',
                               style: TextStyle(
-                                color: Colors.grey[500],
+                                color: Colors.amber[600],
                                 fontSize: 12,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -205,26 +184,16 @@ class ContentCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // Botón de play
                 Container(
                   width: 40,
                   height: 40,
-                  // decoration: BoxDecoration(
-                  //   color: const Color.fromARGB(255, 255, 184, 41),
-                  //   shape: BoxShape.circle,
-                  //   boxShadow: [
-                  //     BoxShadow(
-                  //       color: const Color.fromARGB(255, 255, 255, 255)
-                  //           .withOpacity(0.3),
-                  //       blurRadius: 8,
-                  //       offset: const Offset(0, 2),
-                  //     ),
-                  //   ],
-                  // ),
-                  child: const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Color.fromARGB(255, 255, 166, 0),
+                  decoration: BoxDecoration(
+                    color: Colors.amber[50],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.amber[600],
                     size: 24,
                   ),
                 ),
@@ -249,14 +218,7 @@ class ContentCardLarge extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [
-            Colors.deepPurple[900]!.withOpacity(0.8),
-            Colors.black87,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.black87,
       ),
       child: Material(
         color: Colors.transparent,

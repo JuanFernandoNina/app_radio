@@ -40,29 +40,45 @@ class _GruposScreenState extends State<GruposScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Grupos',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+        centerTitle: true,
+        title: Column(
+          children: [
+            const SizedBox(height: 8),
+            const Text(
+              'CHACALTAYA',
+              style: TextStyle(
+                color: Color(0xFFFFB700),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 4,
+                fontFamily: 'Inter',
+              ),
+            ),
+            Text(
+              'MÚSICA',
+              style: TextStyle(
+                color: Colors.grey[900],
+                fontSize: 25,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Búsqueda próximamente')),
-              );
-            },
-          ),
-        ],
+        backgroundColor: Colors.white,
+        elevation: 0,
+        toolbarHeight: 80,
       ),
       body: Consumer2<ContentProvider, CategoryProvider>(
         builder: (context, contentProvider, categoryProvider, child) {
           if (contentProvider.isLoading || categoryProvider.isLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: Colors.deepPurple),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFB700)),
+              ),
             );
           }
 
@@ -71,20 +87,59 @@ class _GruposScreenState extends State<GruposScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                  Icon(Icons.error_outline,
+                      size: 64, color: const Color(0xFFFFB700)),
                   const SizedBox(height: 16),
                   Text(
-                    'Error: ${contentProvider.error}',
+                    'Sin conexión',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.red),
+                    style: TextStyle(
+                      color: Colors.grey[900],
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      fontFamily: 'Inter',
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Verifica tu conexión a Internet\ne intenta nuevamente',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.5,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
                       contentProvider.loadActiveContent();
                       categoryProvider.loadCategories();
                     },
-                    child: const Text('Reintentar'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFB700),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'REINTENTAR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -120,7 +175,7 @@ class _GruposScreenState extends State<GruposScreen> {
               await contentProvider.loadActiveContent();
               await categoryProvider.loadCategories();
             },
-            color: Colors.deepPurple,
+            color: const Color(0xFFFFB700),
             backgroundColor: Colors.white,
             child: CustomScrollView(
               slivers: [
@@ -131,20 +186,23 @@ class _GruposScreenState extends State<GruposScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Explora por Grupos',
+                        Text(
+                          'Explora nuestra música',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.grey[900],
                             fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Inter',
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Contenido organizado en ${gruposCategories.length} categorías',
+                          '${gruposCategories.length} categorías disponibles',
                           style: TextStyle(
-                            color: Colors.grey[400],
+                            color: Colors.grey[600],
                             fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Inter',
                           ),
                         ),
                       ],
@@ -200,11 +258,15 @@ class _GruposScreenState extends State<GruposScreen> {
                             _selectedCategoryId = null;
                           });
                         },
-                        icon: const Icon(Icons.grid_view,
-                            color: Colors.deepPurple),
+                        icon: Icon(Icons.grid_view,
+                            color: const Color(0xFFFFB700)),
                         label: const Text(
                           'Ver todas las categorías',
-                          style: TextStyle(color: Colors.deepPurple),
+                          style: TextStyle(
+                            color: Color(0xFFFFB700),
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
+                          ),
                         ),
                       ),
                     ),
@@ -220,10 +282,11 @@ class _GruposScreenState extends State<GruposScreen> {
                           _selectedCategoryId == null
                               ? 'Todo el contenido'
                               : 'Contenido de ${gruposCategories.firstWhere((c) => c.id == _selectedCategoryId).name}',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Colors.grey[900],
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Inter',
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -266,7 +329,16 @@ class _GruposScreenState extends State<GruposScreen> {
                                 _selectedCategoryId = null;
                               });
                             },
-                            child: const Text('Ver todo'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFFFFB700),
+                            ),
+                            child: const Text(
+                              'Ver todo',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -303,16 +375,6 @@ class _GruposScreenState extends State<GruposScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
-    // Parsear color
-    Color categoryColor;
-    try {
-      categoryColor = category.color != null
-          ? Color(int.parse(category.color!.replaceFirst('#', '0xFF')))
-          : Colors.deepPurple;
-    } catch (e) {
-      categoryColor = Colors.deepPurple;
-    }
-
     // Parsear icono
     IconData categoryIcon;
     switch (category.icon) {
@@ -347,22 +409,12 @@ class _GruposScreenState extends State<GruposScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isSelected
-                  ? [categoryColor, categoryColor.withOpacity(0.7)]
-                  : [
-                      categoryColor.withOpacity(0.3),
-                      categoryColor.withOpacity(0.1)
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border:
-                isSelected ? Border.all(color: categoryColor, width: 2) : null,
-          ),
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color:
+                isSelected ? const Color(0xFFFFB700) : const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -372,7 +424,9 @@ class _GruposScreenState extends State<GruposScreen> {
                 children: [
                   Icon(
                     categoryIcon,
-                    color: Colors.white,
+                    color: isSelected
+                        ? const Color.fromARGB(255, 255, 255, 255)
+                        : const Color.fromARGB(255, 153, 153, 153),
                     size: 32,
                   ),
                   if (isSelected)
@@ -388,10 +442,11 @@ class _GruposScreenState extends State<GruposScreen> {
                 children: [
                   Text(
                     category.name,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.grey[800],
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Inter',
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -400,8 +455,11 @@ class _GruposScreenState extends State<GruposScreen> {
                   Text(
                     '$contentCount contenidos',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.9)
+                          : Colors.grey[600],
                       fontSize: 12,
+                      fontFamily: 'Inter',
                     ),
                   ),
                 ],
