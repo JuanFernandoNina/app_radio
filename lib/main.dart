@@ -8,14 +8,22 @@ import 'providers/content_provider.dart';
 import 'providers/category_provider.dart';
 import 'providers/carousel_provider.dart';
 import 'services/supabase_service.dart';
-import 'screens/admin/admin_login_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'providers/event_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ✅ Inicializar JustAudioBackground para reproducción en segundo plano
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.radio.chacaltaya.channel',
+    androidNotificationChannelName: 'Radio Chacaltaya',
+    androidNotificationOngoing: true,
+    androidStopForegroundOnPause: true,
+    notificationColor: Colors.yellow[800]!,
+  );
   // ✅ Inicializar localización en español
   await initializeDateFormatting('es', null);
 
@@ -38,7 +46,6 @@ class _MyAppState extends State<MyApp> {
     _initSupabase();
   }
 
-  // ✅ Inicializar Supabase de forma asíncrona sin bloquear la UI
   Future<void> _initSupabase() async {
     try {
       await SupabaseService.initialize(
@@ -53,7 +60,6 @@ class _MyAppState extends State<MyApp> {
       debugPrint('✅ Supabase initialized');
     } catch (e) {
       debugPrint('❌ Error initializing Supabase: $e');
-      // La app puede funcionar sin Supabase
       if (mounted) {
         setState(() => _isSupabaseInitialized = true);
       }
@@ -70,25 +76,22 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => EventProvider()),
       ],
       child: MaterialApp(
-        title: 'Radio Chacaltaya',
         theme: ThemeData(
           primarySwatch: Colors.yellow,
           visualDensity: VisualDensity.adaptivePlatformDensity,
           fontFamily: 'Montserrat',
         ),
         debugShowCheckedModeBanner: false,
-        // ✅ Mostrar la app inmediatamente, Supabase carga en background
         home:
             _isSupabaseInitialized ? const MainScreen() : const _SplashScreen(),
-        routes: {
-          '/admin-login': (context) => const AdminLoginScreen(),
-        },
+        //  routes: {
+        //    '/admin-login': (context) => const AdminLoginScreen(),
+        //  },
       ),
     );
   }
 }
 
-// ✅ Splash screen simple mientras carga Supabase
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
@@ -111,7 +114,6 @@ class _SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Aquí puedes poner tu logo
               const Icon(
                 Icons.radio,
                 size: 100,
@@ -158,10 +160,10 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    HomeScreen(),
-    MembersScreen(),
-    GruposScreen(),
-    EventsScreen(),
+    const HomeScreen(),
+    const MembersScreen(),
+    const GruposScreen(),
+    const EventsScreen(),
   ];
 
   @override

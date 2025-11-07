@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.radio_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion  
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

@@ -27,6 +27,7 @@ dependencies:
   flutter_spinkit: ^5.2.1
   fluentui_system_icons: ^1.1.273
   url_launcher: ^6.3.2
+  audio_session: ^0.2.2
 
   # Utilidades
   intl: ^0.20.2

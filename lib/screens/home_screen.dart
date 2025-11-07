@@ -10,18 +10,19 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const _primaryColor = Color.fromARGB(255, 255, 166, 0);
-
-  // ✅ Tu stream original
   static const _streamUrl = "https://stream.zeno.fm/rihjsl5lkhmuv";
-
-  // ✅ Stream de respaldo (funciona mejor en emuladores)
   static const _backupStreamUrl = "https://icecast.radiofrance.fr/fip-hifi.aac";
-
   static const _radioLogo = "https://i.postimg.cc/xTmMhR4m/img-radio.png";
+  // ✅ URL alternativa si la primera falla
+  static const _appShareUrl =
+      "https://play.google.com/store/apps/details?id=com.radiochacaltaya.app"; // Reemplaza con tu URL real
+  static const _appShareMessage =
+      "¡Escucha Radio Chacaltaya 97.16 FM en vivo! Descarga la app oficial:";
 
   late final AudioPlayer _player;
+
   double _volume = 0.5;
   bool _isInitializing = true;
   String _statusMessage = 'Cargando radio...';
@@ -40,12 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _player = AudioPlayer();
 
-    // ✅ Inicializar DESPUÉS de que el widget se construya
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initAudioPlayer();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // ✅ El audio continuará reproduciéndose en segundo plano
+    debugPrint('📱 App lifecycle state: $state');
   }
 
   Future<void> _initAudioPlayer() async {
@@ -57,11 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     String urlToTry = _streamUrl;
-
-    // ✅ Intentar con el stream principal primero
     bool success = await _tryLoadStream(urlToTry);
 
-    // ✅ Si falla, intentar con stream de respaldo (solo para pruebas en emulador)
     if (!success) {
       debugPrint("⚠️ Stream principal falló, intentando respaldo...");
       setState(() {
@@ -98,7 +102,6 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _statusMessage = 'Error de conexión';
         });
-
         _showErrorDialog();
       }
 
@@ -111,20 +114,23 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       debugPrint("🎵 Intentando cargar: $url");
 
+      // ✅ MediaItem sin imagen - usará el color de fondo de la notificación
+      final mediaItem = MediaItem(
+        id: '1',
+        album: "Radio Chacaltaya",
+        title: "En vivo",
+        artUri: Uri.parse(_radioLogo),
+      );
+
       await _player
           .setAudioSource(
         AudioSource.uri(
           Uri.parse(url),
-          tag: MediaItem(
-            id: '1',
-            album: "Radio Chacaltaya",
-            title: "En vivo",
-            artUri: Uri.parse(_radioLogo),
-          ),
+          tag: mediaItem,
         ),
       )
           .timeout(
-        const Duration(seconds: 15), // ✅ Reducido a 15 seg para fallar rápido
+        const Duration(seconds: 15),
         onTimeout: () {
           throw Exception('Timeout al conectar');
         },
@@ -189,6 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     super.dispose();
   }
@@ -228,9 +235,9 @@ class _HomeScreenState extends State<HomeScreen> {
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
-          Color.fromARGB(200, 255, 166, 0),
+          Color.fromARGB(214, 255, 115, 0),
           Color.fromARGB(200, 233, 140, 0),
-          Color.fromARGB(117, 255, 208, 0),
+          Color.fromARGB(213, 255, 187, 0),
         ],
         stops: [0.0, 0.5, 1.0],
       ),
@@ -390,18 +397,18 @@ class _HomeScreenState extends State<HomeScreen> {
       alignment: Alignment.bottomCenter,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(40),
             topRight: Radius.circular(40),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
-              blurRadius: 15,
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 20,
               spreadRadius: 0,
-              offset: Offset(0, -5),
+              offset: const Offset(0, -4),
             ),
           ],
         ),
@@ -452,48 +459,147 @@ class _HomeScreenState extends State<HomeScreen> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              icon: const Icon(Icons.skip_previous,
-                  size: 35, color: Colors.black54),
-              onPressed: () {},
-            ),
-            const SizedBox(width: 15),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: const CircleBorder(),
-                padding: const EdgeInsets.all(15),
-                backgroundColor: Colors.deepPurple,
-                elevation: 8,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              onPressed: (_isInitializing || isLoading)
-                  ? null
-                  : () {
-                      if (isPlaying) {
-                        _player.pause();
+              child: IconButton(
+                icon: const Icon(Icons.refresh_rounded,
+                    size: 28, color: Color(0xFFFFB700)),
+                onPressed: () {
+                  _initAudioPlayer();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Reconectando...'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                tooltip: 'Reconectar',
+              ),
+            ),
+            const SizedBox(width: 24),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFFFB700),
+                    Color(0xFFFF8C00),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFFB700).withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(35),
+                  onTap: (_isInitializing || isLoading)
+                      ? null
+                      : () {
+                          if (isPlaying) {
+                            _player.pause();
+                          } else {
+                            _player.play();
+                          }
+                        },
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: SizedBox(
+                      width: 35,
+                      height: 35,
+                      child: (isLoading || _isInitializing)
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            )
+                          : Icon(
+                              isPlaying
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded,
+                              size: 35,
+                              color: Colors.white,
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 24),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(50),
+                  onTap: () async {
+                    try {
+                      final uri = Uri.parse(_appShareUrl);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  '¡Gracias por compartir nuestra app! 🎵'),
+                              backgroundColor: Color(0xFFFFB700),
+                            ),
+                          );
+                        }
                       } else {
-                        _player.play();
+                        throw 'No se pudo abrir el enlace';
                       }
-                    },
-              child: SizedBox(
-                width: 35,
-                height: 35,
-                child: (isLoading || _isInitializing)
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 3,
-                      )
-                    : Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow,
-                        size: 35,
-                        color: Colors.white,
-                      ),
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'No se pudo abrir el enlace para compartir'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: const Icon(
+                      Icons.share_rounded,
+                      size: 28,
+                      color: Color(0xFFFFB700),
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 20),
-            IconButton(
-              icon:
-                  const Icon(Icons.skip_next, size: 35, color: Colors.black54),
-              onPressed: () {},
             ),
           ],
         );
