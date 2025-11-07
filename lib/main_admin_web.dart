@@ -5,6 +5,7 @@ import 'providers/category_provider.dart';
 import 'providers/carousel_provider.dart';
 import 'services/supabase_service.dart';
 import 'screens/admin/admin_dashboard_screen.dart';
+import 'providers/event_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ class AdminWebApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ContentProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => CarouselProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
       ],
       child: MaterialApp(
         title: 'Radio App - Panel Admin',

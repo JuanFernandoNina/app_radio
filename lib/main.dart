@@ -10,11 +10,15 @@ import 'providers/carousel_provider.dart';
 import 'services/supabase_service.dart';
 import 'screens/admin/admin_login_screen.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'providers/event_provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ SOLUCIÓN: No esperar a Supabase, inicializar en paralelo
+  // ✅ Inicializar localización en español
+  await initializeDateFormatting('es', null);
+
   runApp(const MyApp());
 }
 
@@ -63,6 +67,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => ContentProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => CarouselProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
       ],
       child: MaterialApp(
         title: 'Radio Chacaltaya',
