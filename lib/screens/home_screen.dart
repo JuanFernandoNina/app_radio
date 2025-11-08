@@ -14,12 +14,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const _primaryColor = Color.fromARGB(255, 255, 166, 0);
   static const _streamUrl = "https://stream.zeno.fm/rihjsl5lkhmuv";
   static const _backupStreamUrl = "https://icecast.radiofrance.fr/fip-hifi.aac";
-  static const _radioLogo = "https://i.postimg.cc/xTmMhR4m/img-radio.png";
+  // static const _radioLogo = "assets/img/img-radio.png";
   // ✅ URL alternativa si la primera falla
   static const _appShareUrl =
       "https://play.google.com/store/apps/details?id=com.radiochacaltaya.app"; // Reemplaza con tu URL real
-  static const _appShareMessage =
-      "¡Escucha Radio Chacaltaya 97.16 FM en vivo! Descarga la app oficial:";
+  // static const _appShareMessage =
+  //    "¡Escucha Radio Chacaltaya 97.16 FM en vivo! Descarga la app oficial:";
 
   late final AudioPlayer _player;
 
@@ -87,17 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               _usingBackupStream ? '¡Modo prueba activado!' : '¡Radio lista!';
         });
 
-        if (_usingBackupStream) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                '⚠️ Usando stream de prueba. Prueba en dispositivo físico para mejor experiencia.',
-              ),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 5),
-            ),
-          );
-        }
+        if (_usingBackupStream) {}
       } else {
         setState(() {
           _statusMessage = 'Error de conexión';
@@ -114,12 +104,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     try {
       debugPrint("🎵 Intentando cargar: $url");
 
-      // ✅ MediaItem sin imagen - usará el color de fondo de la notificación
       final mediaItem = MediaItem(
-        id: '1',
+        id: 'radio_chacaltaya_live',
         album: "Radio Chacaltaya",
-        title: "En vivo",
-        artUri: Uri.parse(_radioLogo),
+        title: "97.16 FM",
+        artist: "En Vivo",
+        artUri: Uri.parse(
+            'android.resource://com.example.radio_app/drawable/radio_notification'),
+        displayTitle: "Radio Chacaltaya 97.16 FM",
+        displaySubtitle: "97.16 FM - En Vivo",
+        displayDescription: "Transmitiendo desde La Paz, Bolivia",
       );
 
       await _player
@@ -235,9 +229,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
-          Color.fromARGB(214, 255, 115, 0),
+          Color.fromARGB(230, 255, 115, 0),
           Color.fromARGB(200, 233, 140, 0),
-          Color.fromARGB(213, 255, 187, 0),
+          Color.fromARGB(255, 255, 208, 0),
         ],
         stops: [0.0, 0.5, 1.0],
       ),
@@ -303,11 +297,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 5),
+          const SizedBox(height: 1),
           _buildRadioImageCard(),
-          const SizedBox(height: 10),
-          _buildRadioInfo(),
           const SizedBox(height: 2),
+          _buildRadioInfo(),
+          const SizedBox(height: 1),
           _buildSocialMediaButtons(),
         ],
       ),
@@ -316,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _buildRadioImageCard() {
     return Card(
-      elevation: 10,
+      elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(35),
@@ -381,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       children: _socialMedia
           .map(
             (social) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 0),
               child: _SocialMediaButton(
                 icon: social["icon"]!,
                 onPressed: () => _launchUrl(social["url"]!),

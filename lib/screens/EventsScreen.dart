@@ -42,7 +42,7 @@ class _EventsScreenState extends State<EventsScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        const Color.fromARGB(255, 255, 255, 255)!,
+                        const Color.fromARGB(255, 255, 255, 255),
                         const Color.fromARGB(255, 255, 255, 255),
                       ],
                     ),

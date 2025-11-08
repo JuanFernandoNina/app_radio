@@ -17,13 +17,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Inicializar JustAudioBackground para reproducción en segundo plano
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.radio.chacaltaya.channel',
-    androidNotificationChannelName: 'Radio Chacaltaya',
-    androidNotificationOngoing: true,
-    androidStopForegroundOnPause: true,
-    notificationColor: Colors.yellow[800]!,
-  );
+await JustAudioBackground.init(
+  androidNotificationChannelId: 'com.example.radio_app.channel.audio',
+  androidNotificationChannelName: 'Radio Chacaltaya Audio',
+  androidNotificationOngoing: true,
+  androidStopForegroundOnPause: true,
+  androidNotificationClickStartsActivity: true,
+  androidNotificationIcon: 'mipmap/ic_launcher',
+  notificationColor: const Color(0xFFFFB700),                                                         
+);
   // ✅ Inicializar localización en español
   await initializeDateFormatting('es', null);
 
