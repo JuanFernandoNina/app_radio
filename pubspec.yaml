@@ -42,13 +42,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    - images/Logo.png
     - assets/Icon/instagram.png
     - assets/Icon/facebook.png
     - assets/Icon/tiktok.png
     - assets/img/radio.png
     - assets/Icon/whassapp.png
-    - assets/img/img-radio.png
 
 dependency_overrides:
   # Workaround para conflicto con CarouselController en Flutter

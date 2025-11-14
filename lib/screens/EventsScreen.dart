@@ -29,7 +29,7 @@ class _EventsScreenState extends State<EventsScreen> {
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: RefreshIndicator(
-          color: Colors.amber[700],
+          color: Colors.blue[700], // Cambiado de amber a blue
           onRefresh: () => context.read<EventProvider>().refresh(),
           child: CustomScrollView(
             slivers: [
@@ -119,7 +119,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         width: 4,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: Colors.amber[700],
+                          color: Colors.blue[700], // Cambiado de amber a blue
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -146,7 +146,7 @@ class _EventsScreenState extends State<EventsScreen> {
                     return const SliverFillRemaining(
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: Colors.amber,
+                          color: Colors.blue, // Cambiado de amber a blue
                         ),
                       ),
                     );
@@ -161,13 +161,15 @@ class _EventsScreenState extends State<EventsScreen> {
                             Container(
                               padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
-                                color: Colors.amber[50],
+                                color:
+                                    Colors.blue[50], // Cambiado de amber a blue
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.event_busy_rounded,
                                 size: isTablet ? 80 : 64,
-                                color: Colors.amber[300],
+                                color: Colors
+                                    .blue[300], // Cambiado de amber a blue
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -228,7 +230,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         width: 4,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: Colors.amber[700],
+                          color: Colors.blue[700], // Cambiado de amber a blue
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -361,19 +363,25 @@ class WeekDaySelector extends StatelessWidget {
                         ? LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Colors.amber[600]!, Colors.amber[400]!],
+                            colors: [
+                              Colors.blue[600]!,
+                              Colors.blue[400]!
+                            ], // Cambiado de amber a blue
                           )
                         : null,
                     color: isSelected ? null : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isToday ? Colors.amber[700]! : Colors.grey[200]!,
+                      color: isToday
+                          ? Colors.blue[700]!
+                          : Colors.grey[200]!, // Cambiado de amber a blue
                       width: isToday ? 2.5 : 1,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: Colors.amber.withOpacity(0.3),
+                              color: Colors.blue
+                                  .withOpacity(0.3), // Cambiado de amber a blue
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             )
@@ -411,8 +419,9 @@ class WeekDaySelector extends StatelessWidget {
                           width: 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color:
-                                isSelected ? Colors.white : Colors.amber[700],
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.blue[700], // Cambiado de amber a blue
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -443,12 +452,15 @@ class EventCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.amber[600]!, Colors.amber[500]!],
+          colors: [
+            Colors.blue[600]!,
+            Colors.blue[500]!
+          ], // Cambiado de amber a blue
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withOpacity(0.3),
+            color: Colors.blue.withOpacity(0.3), // Cambiado de amber a blue
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -584,7 +596,8 @@ class ReminderCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber[200]!),
+        border:
+            Border.all(color: Colors.blue[200]!), // Cambiado de amber a blue
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -598,12 +611,12 @@ class ReminderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber[50],
+              color: Colors.blue[50], // Cambiado de amber a blue
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.notifications_active_rounded,
-              color: Colors.amber[700],
+              color: Colors.blue[700], // Cambiado de amber a blue
               size: isTablet ? 28 : 24,
             ),
           ),
@@ -735,13 +748,14 @@ class EventDetailsSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.amber[50],
+                color: Colors.blue[50], // Cambiado de amber a blue
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Icon(Icons.calendar_today_rounded,
-                      size: 20, color: Colors.amber[700]),
+                      size: 20,
+                      color: Colors.blue[700]), // Cambiado de amber a blue
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -765,13 +779,14 @@ class EventDetailsSheet extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.amber[50],
+                  color: Colors.blue[50], // Cambiado de amber a blue
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
                     Icon(Icons.access_time_rounded,
-                        size: 20, color: Colors.amber[700]),
+                        size: 20,
+                        color: Colors.blue[700]), // Cambiado de amber a blue
                     const SizedBox(width: 12),
                     Text(
                       event.timeRange,
@@ -817,7 +832,7 @@ class EventDetailsSheet extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: isTablet ? 18 : 16),
-                  backgroundColor: Colors.amber[600],
+                  backgroundColor: Colors.blue[600], // Cambiado de amber a blue
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

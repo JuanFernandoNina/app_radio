@@ -17,15 +17,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ Inicializar JustAudioBackground para reproducción en segundo plano
-await JustAudioBackground.init(
-  androidNotificationChannelId: 'com.example.radio_app.channel.audio',
-  androidNotificationChannelName: 'Radio Chacaltaya Audio',
-  androidNotificationOngoing: true,
-  androidStopForegroundOnPause: true,
-  androidNotificationClickStartsActivity: true,
-  androidNotificationIcon: 'mipmap/ic_launcher',
-  notificationColor: const Color(0xFFFFB700),                                                         
-);
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.example.radio_app.channel.audio',
+    androidNotificationChannelName: 'Radio Chacaltaya Audio',
+    androidNotificationOngoing: true,
+    androidStopForegroundOnPause: true,
+    androidNotificationClickStartsActivity: true,
+    androidNotificationIcon: 'mipmap/ic_launcher',
+    notificationColor: const Color(0xFFFFB700),
+  );
   // ✅ Inicializar localización en español
   await initializeDateFormatting('es', null);
 
@@ -106,9 +106,9 @@ class _SplashScreen extends StatelessWidget {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color.fromARGB(255, 255, 208, 0),
-              Color.fromARGB(255, 233, 140, 0),
-              Color.fromARGB(255, 255, 166, 0),
+              Color.fromARGB(249, 0, 41, 136),
+              Color.fromARGB(255, 4, 35, 209),
+              Color.fromARGB(255, 28, 60, 240),
             ],
           ),
         ),
@@ -181,7 +181,7 @@ class _MainScreenState extends State<MainScreen> {
       currentIndex: _currentIndex,
       onTap: (index) => setState(() => _currentIndex = index),
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color.fromARGB(255, 255, 196, 0),
+      selectedItemColor: const Color.fromARGB(255, 0, 91, 209),
       unselectedItemColor: Colors.grey,
       selectedLabelStyle: const TextStyle(
         fontSize: 13,
@@ -200,12 +200,12 @@ class _MainScreenState extends State<MainScreen> {
         BottomNavigationBarItem(
           icon: Icon(FluentIcons.people_12_regular),
           activeIcon: Icon(FluentIcons.people_12_filled),
-          label: 'Miembros',
+          label: 'Noticias',
         ),
         BottomNavigationBarItem(
           icon: Icon(FluentIcons.music_note_2_24_regular),
           activeIcon: Icon(FluentIcons.music_note_2_24_filled),
-          label: 'Música',
+          label: 'Reflexiones',
         ),
         BottomNavigationBarItem(
           icon: Icon(FluentIcons.calendar_16_regular),

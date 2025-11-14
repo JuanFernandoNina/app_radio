@@ -23,7 +23,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
   // Design constants
   static const double _kHeight = 220;
   static const double _kViewportFraction = 0.85;
-  static const Color _kAccent = Colors.amber;
+  static const Color _kAccent = Colors.blue; // Cambiado a azul
   static const Color _kOnAccent = Colors.white;
   static const Color _kInactiveDot = Color(0xFF616161);
 
@@ -150,7 +150,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
             boxShadow: [
               BoxShadow(
                 color: isActive
-                    ? const Color.fromARGB(255, 255, 249, 199).withOpacity(0.4)
+                    ? const Color.fromARGB(255, 199, 225, 255).withOpacity(0.4) // Cambiado a azul claro
                     : Colors.black.withOpacity(0.3),
                 blurRadius: isActive ? 20 : 10,
                 spreadRadius: isActive ? 2 : 0,
@@ -178,8 +178,8 @@ class _CarouselBannerState extends State<CarouselBanner> {
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.amber,
-                              Colors.amberAccent,
+                              Colors.blue, // Cambiado a azul
+                              Colors.lightBlueAccent, // Cambiado a azul claro
                             ],
                           ),
                         ),
@@ -230,11 +230,11 @@ class _CarouselBannerState extends State<CarouselBanner> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: _kAccent,
+                        color: _kAccent, // Ya cambiado a azul
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: _kAccent.withOpacity(0.5),
+                            color: _kAccent.withOpacity(0.5), // Ya cambiado a azul
                             blurRadius: 8,
                             spreadRadius: 1,
                           ),
@@ -245,12 +245,12 @@ class _CarouselBannerState extends State<CarouselBanner> {
                         children: [
                           Icon(Icons.stars,
                               size: 14,
-                              color: Color.fromARGB(255, 255, 225, 225)),
+                              color: Colors.white), // Cambiado a blanco
                           SizedBox(width: 4),
                           Text(
                             'NUEVO',
                             style: TextStyle(
-                              color: Colors.black,
+                              color: Colors.white, // Cambiado a blanco
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -324,7 +324,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: _kAccent,
+                                color: _kAccent, // Ya cambiado a azul
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Row(
@@ -333,7 +333,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                                   Text(
                                     'Ver más',
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: Colors.white, // Cambiado a blanco
                                       fontSize: 13,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -342,7 +342,7 @@ class _CarouselBannerState extends State<CarouselBanner> {
                                   Icon(
                                     Icons.arrow_forward,
                                     size: 16,
-                                    color: Colors.black,
+                                    color: Colors.white, // Cambiado a blanco
                                   ),
                                 ],
                               ),

@@ -7,8 +7,7 @@ class CategoryFilter extends StatelessWidget {
   final Function(String?) onCategorySelected;
 
   // Design constants
-  static const Color _kAccent =
-      Color(0xFFFFB700); // Amarillo brillante como en la imagen
+  static const Color _kAccent = Color(0xFF2196F3); // Cambiado a azul
   static const Color _kOnAccent = Colors.white;
   static const double _kHeight = 50.0;
   static const double _kIconSize = 16.0;

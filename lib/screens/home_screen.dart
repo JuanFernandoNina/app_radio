@@ -11,17 +11,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  static const _primaryColor = Color.fromARGB(255, 255, 166, 0);
-  static const _streamUrl = "https://stream.zeno.fm/rihjsl5lkhmuv";
-  static const _backupStreamUrl = "https://icecast.radiofrance.fr/fip-hifi.aac";
-  // static const _radioLogo = "assets/img/img-radio.png";
-  // ✅ URL alternativa si la primera falla
+  static const _primaryColor = Color.fromARGB(255, 33, 150, 243);
+  static const _streamUrl =
+      "https://stream.live.novotempo.com/radio/smil:radionuevotiempo.smil/playlist.m3u8";
+  static const _backupStreamUrl =
+      "https://stream.live.novotempo.com/radio/smil:radionuevotiempo.smil/playlist.m3u8";
   static const _appShareUrl =
-      "https://play.google.com/store/apps/details?id=com.radiochacaltaya.app"; // Reemplaza con tu URL real
-  // static const _appShareMessage =
-  //    "¡Escucha Radio Chacaltaya 97.16 FM en vivo! Descarga la app oficial:";
+      "https://play.google.com/store/apps/details?id=com.radiochacaltaya.app";
 
   late final AudioPlayer _player;
+  bool _isDisposed = false;
 
   double _volume = 0.5;
   bool _isInitializing = true;
@@ -29,13 +28,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _usingBackupStream = false;
 
   final List<Map<String, String>> _socialMedia = [
-    {"icon": "assets/Icon/facebook.png", "url": "https://facebook.com"},
+    {
+      "icon": "assets/Icon/facebook.png",
+      "url": "https://www.facebook.com/nuevotiempobolivia"
+    },
     {
       "icon": "assets/Icon/whassapp.png",
-      "url": "https://wa.me/yourphonenumber"
+      "url": "https://api.whatsapp.com/send?phone=59172237330"
     },
-    {"icon": "assets/Icon/instagram.png", "url": "https://instagram.com"},
-    {"icon": "assets/Icon/facebook.png", "url": "https://tusitioweb.com"},
+    {
+      "icon": "assets/Icon/instagram.png",
+      "url": "https://www.instagram.com/radionuevotiempo/"
+    },
+    // {"icon": "assets/Icon/facebook.png", "url": "https://tusitioweb.com"},
   ];
 
   @override
@@ -43,24 +48,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _player = AudioPlayer();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initAudioPlayer();
-    });
+    _initAudioPlayer();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // ✅ El audio continuará reproduciéndose en segundo plano
     debugPrint('📱 App lifecycle state: $state');
   }
 
-  Future<void> _initAudioPlayer() async {
-    if (!mounted) return;
+  void _safeSetState(VoidCallback fn) {
+    if (!_isDisposed && mounted) {
+      setState(fn);
+    }
+  }
 
-    setState(() {
+  Future<void> _initAudioPlayer() async {
+    _safeSetState(() {
       _isInitializing = true;
-      _statusMessage = 'Conectando a Radio Chacaltaya...';
+      _statusMessage = 'Conectando a Radio Nuevo Tiempo...';
     });
 
     String urlToTry = _streamUrl;
@@ -68,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     if (!success) {
       debugPrint("⚠️ Stream principal falló, intentando respaldo...");
-      setState(() {
+      _safeSetState(() {
         _statusMessage = 'Probando conexión alternativa...';
         _usingBackupStream = true;
       });
@@ -77,26 +82,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       success = await _tryLoadStream(urlToTry);
     }
 
-    if (mounted) {
+    if (!_isDisposed && mounted) {
       if (success) {
         await _player.setVolume(_volume);
         debugPrint("🔊 Volumen configurado: $_volume");
 
-        setState(() {
+        _safeSetState(() {
           _statusMessage =
               _usingBackupStream ? '¡Modo prueba activado!' : '¡Radio lista!';
         });
 
-        if (_usingBackupStream) {}
+        await Future.delayed(const Duration(milliseconds: 500));
+        _safeSetState(() => _isInitializing = false);
       } else {
-        setState(() {
+        _safeSetState(() {
           _statusMessage = 'Error de conexión';
+          _isInitializing = false;
         });
-        _showErrorDialog();
+        if (mounted) {
+          _showErrorDialog();
+        }
       }
-
-      await Future.delayed(const Duration(milliseconds: 500));
-      setState(() => _isInitializing = false);
     }
   }
 
@@ -105,15 +111,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       debugPrint("🎵 Intentando cargar: $url");
 
       final mediaItem = MediaItem(
-        id: 'radio_chacaltaya_live',
-        album: "Radio Chacaltaya",
-        title: "97.16 FM",
+        id: 'radio_nuevo_tiempo_live',
+        album: "Radio Nuevo Tiempo",
+        title: "92.16 FM",
         artist: "En Vivo",
         artUri: Uri.parse(
-            'android.resource://com.example.radio_app/drawable/radio_notification'),
-        displayTitle: "Radio Chacaltaya 97.16 FM",
-        displaySubtitle: "97.16 FM - En Vivo",
-        displayDescription: "Transmitiendo desde La Paz, Bolivia",
+            'android.resource://com.example.radio_app/drawable/radio_notification1'),
+        displayTitle: "Radio Nuevo Tiempo 92.16 FM",
+        displaySubtitle: "92.16 FM - En Vivo",
+        displayDescription: "La voz de la Esperanza",
       );
 
       await _player
@@ -139,6 +145,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _showErrorDialog() {
+    if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -189,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _isDisposed = true;
     WidgetsBinding.instance.removeObserver(this);
     _player.dispose();
     super.dispose();
@@ -214,12 +223,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      flexibleSpace: Center(
-        child: Image.asset('images/Logo.png', fit: BoxFit.contain, height: 80),
+      title: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'RADIO NUEVO TIEMPO',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '92.16 FM',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
       ),
       backgroundColor: Colors.transparent,
-      toolbarHeight: 120,
+      toolbarHeight: 80,
       elevation: 0,
+      centerTitle: true,
     );
   }
 
@@ -229,9 +260,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
-          Color.fromARGB(230, 255, 115, 0),
-          Color.fromARGB(200, 233, 140, 0),
-          Color.fromARGB(255, 255, 208, 0),
+          Color.fromARGB(249, 0, 41, 136),
+          Color.fromARGB(255, 4, 35, 209),
+          Color.fromARGB(255, 28, 60, 240),
         ],
         stops: [0.0, 0.5, 1.0],
       ),
@@ -328,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Column(
       children: [
         const Text(
-          'Radio Chacaltaya 97.16',
+          'Radio Nuevo Tiempo',
           style: TextStyle(
             color: Colors.white,
             fontSize: 27,
@@ -345,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
         const Text.rich(
           TextSpan(
-            text: 'CONDUCE: ',
+            text: 'la voz de la ',
             style: TextStyle(
               color: Colors.white,
               fontSize: 23,
@@ -354,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: 'JUAN NINA',
+                text: 'Esperanza',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -467,15 +498,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               child: IconButton(
                 icon: const Icon(Icons.refresh_rounded,
-                    size: 28, color: Color(0xFFFFB700)),
+                    size: 28, color: Color(0xFF2196F3)),
                 onPressed: () {
                   _initAudioPlayer();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Reconectando...'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Reconectando...'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 },
                 tooltip: 'Reconectar',
               ),
@@ -488,13 +521,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFFFFB700),
-                    Color(0xFFFF8C00),
+                    Color(0xFF2196F3),
+                    Color(0xFF1976D2),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFFFB700).withOpacity(0.3),
+                    color: const Color(0xFF2196F3).withOpacity(0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -565,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             const SnackBar(
                               content: Text(
                                   '¡Gracias por compartir nuestra app! 🎵'),
-                              backgroundColor: Color(0xFFFFB700),
+                              backgroundColor: Color(0xFF2196F3),
                             ),
                           );
                         }
@@ -584,12 +617,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       }
                     }
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: const Icon(
+                  child: const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Icon(
                       Icons.share_rounded,
                       size: 28,
-                      color: Color(0xFFFFB700),
+                      color: Color(0xFF2196F3),
                     ),
                   ),
                 ),
@@ -618,7 +651,7 @@ class _SocialMediaButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.orange.withOpacity(0.1), blurRadius: 8),
+            BoxShadow(color: Colors.blue.withOpacity(0.1), blurRadius: 8),
           ],
         ),
         child: Image.asset(icon, width: 45, height: 45),

@@ -17,11 +17,15 @@ class MembersScreen extends StatefulWidget {
 class _MembersScreenState extends State<MembersScreen> {
   String? _selectedCategoryId;
 
+  // PALETA AZUL
+  static const Color kPrimaryBlue = Color(0xFF0066FF);
+
+  static const Color kGrayBlue = Color(0xFF0A1A2F);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Mostrar la pantalla enseguida y cargar en segundo plano
       Future.microtask(() {
         context.read<ContentProvider>().loadActiveContent();
         context.read<CategoryProvider>().loadCategories();
@@ -36,8 +40,6 @@ class _MembersScreenState extends State<MembersScreen> {
     });
   }
 
-  static const Color _kAccent = Colors.amber;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,9 +49,9 @@ class _MembersScreenState extends State<MembersScreen> {
         title: Column(
           children: [
             const Text(
-              'CHACALTAYA',
+              'NOTICIAS',
               style: TextStyle(
-                color: _kAccent,
+                color: kPrimaryBlue,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 4,
@@ -57,9 +59,9 @@ class _MembersScreenState extends State<MembersScreen> {
               ),
             ),
             Text(
-              'MIEMBROS',
+              'UAB',
               style: TextStyle(
-                color: Colors.grey[900],
+                color: kGrayBlue,
                 fontSize: 25,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
@@ -78,7 +80,7 @@ class _MembersScreenState extends State<MembersScreen> {
           if (contentProvider.isLoading || categoryProvider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(_kAccent),
+                valueColor: AlwaysStoppedAnimation<Color>(kPrimaryBlue),
               ),
             );
           }
@@ -88,13 +90,14 @@ class _MembersScreenState extends State<MembersScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 64, color: _kAccent),
+                  const Icon(Icons.error_outline,
+                      size: 64, color: kPrimaryBlue),
                   const SizedBox(height: 16),
                   Text(
                     'Sin conexión',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey[900],
+                      color: kGrayBlue,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
@@ -106,7 +109,7 @@ class _MembersScreenState extends State<MembersScreen> {
                     'Verifica tu conexión a Internet\ne intenta nuevamente',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: kGrayBlue.withOpacity(0.6),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       height: 1.5,
@@ -121,12 +124,10 @@ class _MembersScreenState extends State<MembersScreen> {
                       carouselProvider.loadActiveCarousel();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _kAccent,
+                      backgroundColor: kPrimaryBlue,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                          horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -147,7 +148,7 @@ class _MembersScreenState extends State<MembersScreen> {
             );
           }
 
-          // Filtrar contenido por categoría
+          // Filtrar
           final filteredContents = _selectedCategoryId == null
               ? contentProvider.contents
               : contentProvider.contents
@@ -155,6 +156,7 @@ class _MembersScreenState extends State<MembersScreen> {
                   .toList();
 
           return RefreshIndicator(
+            color: kPrimaryBlue,
             onRefresh: () async {
               await contentProvider.loadActiveContent();
               await categoryProvider.loadCategories();
@@ -171,7 +173,7 @@ class _MembersScreenState extends State<MembersScreen> {
                     ),
                   ),
 
-                // Texto descriptivo de categorías
+                // Texto categorías
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
@@ -181,7 +183,7 @@ class _MembersScreenState extends State<MembersScreen> {
                         Text(
                           'Explora por categorías',
                           style: TextStyle(
-                            color: Colors.grey[900],
+                            color: kGrayBlue,
                             fontSize: 25,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.5,
@@ -192,7 +194,7 @@ class _MembersScreenState extends State<MembersScreen> {
                         Text(
                           'Filtra el contenido por tu categoría favorita',
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: kGrayBlue.withOpacity(0.6),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                             height: 1.5,
@@ -204,7 +206,7 @@ class _MembersScreenState extends State<MembersScreen> {
                   ),
                 ),
 
-                // Filtro de categorías
+                // Filtro categorías
                 if (categoryProvider.categories.isNotEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
@@ -220,23 +222,19 @@ class _MembersScreenState extends State<MembersScreen> {
                     ),
                   ),
 
-                // Lista de contenido
+                // Lista contenido
                 if (filteredContents.isEmpty)
                   SliverFillRemaining(
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.radio,
-                            size: 64,
-                            color: Colors.grey[300],
-                          ),
+                          Icon(Icons.radio, size: 64, color: Colors.grey[300]),
                           const SizedBox(height: 16),
                           Text(
                             'Sin contenido disponible',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: kGrayBlue.withOpacity(0.6),
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 0.5,

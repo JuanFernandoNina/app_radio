@@ -46,9 +46,9 @@ class _GruposScreenState extends State<GruposScreen> {
         title: Column(
           children: [
             const Text(
-              'CHACALTAYA',
+              'UAB',
               style: TextStyle(
-                color: Color(0xFFFFB700),
+                color: Color(0xFF2196F3), // Cambiado a azul
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 4,
@@ -56,7 +56,7 @@ class _GruposScreenState extends State<GruposScreen> {
               ),
             ),
             Text(
-              'MÚSICA',
+              'REFLEXIONES',
               style: TextStyle(
                 color: Colors.grey[900],
                 fontSize: 25,
@@ -76,7 +76,8 @@ class _GruposScreenState extends State<GruposScreen> {
           if (contentProvider.isLoading || categoryProvider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFB700)),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    Color(0xFF2196F3)), // Cambiado a azul
               ),
             );
           }
@@ -87,7 +88,8 @@ class _GruposScreenState extends State<GruposScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.error_outline,
-                      size: 64, color: const Color(0xFFFFB700)),
+                      size: 64,
+                      color: const Color(0xFF2196F3)), // Cambiado a azul
                   const SizedBox(height: 16),
                   Text(
                     'Sin conexión',
@@ -119,7 +121,8 @@ class _GruposScreenState extends State<GruposScreen> {
                       categoryProvider.loadCategories();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB700),
+                      backgroundColor:
+                          const Color(0xFF2196F3), // Cambiado a azul
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -174,7 +177,7 @@ class _GruposScreenState extends State<GruposScreen> {
               await contentProvider.loadActiveContent();
               await categoryProvider.loadCategories();
             },
-            color: const Color(0xFFFFB700),
+            color: const Color(0xFF2196F3), // Cambiado a azul
             backgroundColor: Colors.white,
             child: CustomScrollView(
               slivers: [
@@ -186,7 +189,7 @@ class _GruposScreenState extends State<GruposScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Explora nuestra música',
+                          'Explora nuestra reflexiones',
                           style: TextStyle(
                             color: Colors.grey[900],
                             fontSize: 24,
@@ -262,11 +265,11 @@ class _GruposScreenState extends State<GruposScreen> {
                           });
                         },
                         icon: Icon(Icons.grid_view,
-                            color: const Color(0xFFFFB700)),
+                            color: const Color(0xFF2196F3)), // Cambiado a azul
                         label: const Text(
                           'Ver todas las categorías',
                           style: TextStyle(
-                            color: Color(0xFFFFB700),
+                            color: Color(0xFF2196F3), // Cambiado a azul
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Inter',
                           ),
@@ -333,7 +336,8 @@ class _GruposScreenState extends State<GruposScreen> {
                               });
                             },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFFFFB700),
+                              foregroundColor:
+                                  const Color(0xFF2196F3), // Cambiado a azul
                             ),
                             child: const Text(
                               'Ver todo',
@@ -414,13 +418,15 @@ class _GruposScreenState extends State<GruposScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color:
-                isSelected ? const Color(0xFFFFB700) : const Color(0xFFF5F5F5),
+            color: isSelected
+                ? const Color(0xFF2196F3)
+                : const Color(0xFFF5F5F5), // Cambiado a azul
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               if (isSelected)
                 BoxShadow(
-                  color: const Color(0xFFFFB700).withOpacity(0.3),
+                  color: const Color(0xFF2196F3)
+                      .withOpacity(0.3), // Cambiado a azul
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),

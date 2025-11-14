@@ -240,7 +240,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           Slider(
                             value: _position.inSeconds.toDouble(),
                             max: _duration.inSeconds.toDouble(),
-                            activeColor: Colors.yellow[700],
+                            activeColor: Colors.blue[700], // Cambiado a azul
                             inactiveColor: Colors.grey[300],
                             onChanged: (value) async {
                               final newPos = Duration(seconds: value.toInt());
@@ -276,7 +276,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                             ? Icons.pause_circle_filled
                             : Icons.play_circle_fill,
                         size: 70,
-                        color: Colors.yellow[700],
+                        color: Colors.blue[700], // Cambiado a azul
                       ),
                     ),
                   ],
@@ -299,10 +299,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.yellow[700] : Colors.transparent,
+          color: isSelected
+              ? Colors.blue[700]
+              : Colors.transparent, // Cambiado a azul
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.yellow[700]! : Colors.grey[400]!,
+            color: isSelected
+                ? Colors.blue[700]!
+                : Colors.grey[400]!, // Cambiado a azul
             width: 1.5,
           ),
         ),

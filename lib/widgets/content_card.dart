@@ -9,7 +9,7 @@ class ContentCard extends StatelessWidget {
   const ContentCard({super.key, required this.content});
 
   // Design constants
-  static const Color _kAccent = Colors.amber;
+  static const Color _kAccent = Colors.blue; // Cambiado a azul
   static const Color _kBackground = Colors.white;
   static const double _kBorderRadius = 17;
   static const double _kImageSize = 80.0;
@@ -140,13 +140,13 @@ class ContentCard extends StatelessWidget {
                             Icon(
                               Icons.audiotrack,
                               size: _kIconSize,
-                              color: Colors.amber[600],
+                              color: Colors.blue[600], // Cambiado a azul
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Audio',
                               style: TextStyle(
-                                color: Colors.amber[600],
+                                color: Colors.blue[600], // Cambiado a azul
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -167,13 +167,13 @@ class ContentCard extends StatelessWidget {
                             Icon(
                               Icons.videocam,
                               size: _kIconSize,
-                              color: Colors.amber[600],
+                              color: Colors.blue[600], // Cambiado a azul
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Video',
                               style: TextStyle(
-                                color: Colors.amber[600],
+                                color: Colors.blue[600], // Cambiado a azul
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -188,12 +188,12 @@ class ContentCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: Colors.amber[50],
+                    color: Colors.blue[50], // Cambiado a azul
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.play_arrow_rounded,
-                    color: Colors.amber[600],
+                    color: Colors.blue[600], // Cambiado a azul
                     size: 24,
                   ),
                 ),
@@ -272,8 +272,8 @@ class ContentCardLarge extends StatelessWidget {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.deepPurple[400]!,
-                                Colors.deepPurple[700]!,
+                                Colors.blue[400]!, // Cambiado a azul
+                                Colors.blue[700]!, // Cambiado a azul
                               ],
                             ),
                           ),
@@ -318,11 +318,13 @@ class ContentCardLarge extends StatelessWidget {
                       Row(
                         children: [
                           if (content.audioUrl != null)
-                            _buildBadge(Icons.audiotrack, 'Audio', Colors.blue),
+                            _buildBadge(Icons.audiotrack, 'Audio',
+                                Colors.blue), // Ya es azul
                           if (content.videoUrl != null) ...[
                             if (content.audioUrl != null)
                               const SizedBox(width: 8),
-                            _buildBadge(Icons.videocam, 'Video', Colors.purple),
+                            _buildBadge(Icons.videocam, 'Video',
+                                Colors.blue), // Cambiado a azul
                           ],
                         ],
                       ),
